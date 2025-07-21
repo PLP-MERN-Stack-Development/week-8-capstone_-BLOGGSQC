@@ -1,0 +1,58 @@
+/* Home.css */
+
+/* Optional: Add a smooth gradient animation */
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* A custom hero-section wrapper (extra shine beyond Tailwind) */
+.hero {
+  background: linear-gradient(-45deg, #4f46e5, #7c3aed, #000000, #1e3a8a);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+}
+
+/* Title text glow */
+.hero h1 {
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7),
+               0 0 20px rgba(255, 215, 0, 0.6),
+               0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+/* Subtitle refinement */
+.hero p {
+  max-width: 700px;
+  margin-top: 1rem;
+  font-size: 1.25rem;
+  color: #e5e7eb;
+}
+
+/* Buttons hover tweak */
+.hero button.MuiButton-contained:hover {
+  background-color: #ffd700;
+  color: #000;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+.hero button.MuiButton-outlined:hover {
+  border-color: #ffd700;
+  color: #ffd700;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}

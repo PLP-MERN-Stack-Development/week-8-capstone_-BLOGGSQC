@@ -1,0 +1,26 @@
+/* stylelint-disable at-rule-no-unknown */
+
+/* Tailwind layers */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global font and body settings */
+body {
+  @apply font-sans bg-gray-900 text-white antialiased;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom right, #0f172a, #1e1b4b, #000);
+}
+
+/* Scrollbar styling (optional) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
