@@ -34,37 +34,37 @@ const UpcomingEvents = () => {
   ]
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Events</h3>
+    <div className="glass-card animate-slide-up">
+      <h3 className="text-xl font-semibold text-white mb-6 gradient-text">Upcoming Events</h3>
       <div className="space-y-4">
         {events.map((event) => (
-          <div key={event.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={event.id} className="glass rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all duration-300">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900">{event.title}</h4>
+                <h4 className="font-medium text-white">{event.title}</h4>
                 <div className="mt-2 space-y-1">
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-center text-sm text-gray-400">
                     <Calendar className="h-4 w-4 mr-2" />
                     {format(event.date, 'MMM dd, yyyy')}
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-center text-sm text-gray-400">
                     <Clock className="h-4 w-4 mr-2" />
                     {event.time}
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-center text-sm text-gray-400">
                     <MapPin className="h-4 w-4 mr-2" />
                     {event.location}
                   </div>
                 </div>
               </div>
-              <span className={`px-2 py-1 text-xs font-medium rounded-full ${event.color}`}>
+              <span className={`px-3 py-1 text-xs font-medium rounded-full ${event.color} border border-white/20`}>
                 {event.type}
               </span>
             </div>
           </div>
         ))}
       </div>
-      <button className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium">
+      <button className="mt-6 text-sm text-neon-blue hover:text-neon-blue/80 font-medium transition-colors duration-200">
         View all events
       </button>
     </div>

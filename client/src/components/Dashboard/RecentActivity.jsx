@@ -34,19 +34,19 @@ const RecentActivity = () => {
   ]
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+    <div className="glass-card animate-slide-up">
+      <h3 className="text-xl font-semibold text-white mb-6 gradient-text">Recent Activity</h3>
       <div className="space-y-4">
         {activities.map((activity) => (
           <div key={activity.id} className="flex items-start space-x-3">
-            <div className={`p-2 rounded-lg ${activity.color}`}>
+            <div className={`p-2 rounded-xl ${activity.color} glow-blue`}>
               <activity.icon className="h-4 w-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium text-white">
                 {activity.message}
               </p>
-              <div className="flex items-center mt-1 text-xs text-gray-500">
+              <div className="flex items-center mt-1 text-xs text-gray-400">
                 <span>by {activity.user}</span>
                 <span className="mx-2">•</span>
                 <div className="flex items-center">
@@ -58,7 +58,7 @@ const RecentActivity = () => {
           </div>
         ))}
       </div>
-      <button className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium">
+      <button className="mt-6 text-sm text-neon-blue hover:text-neon-blue/80 font-medium transition-colors duration-200">
         View all activity
       </button>
     </div>

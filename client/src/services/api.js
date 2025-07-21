@@ -41,154 +41,357 @@ api.interceptors.response.use(
   }
 )
 
-// Auth API
+// Mock data generators
+const generateMockData = (type, count = 10) => {
+  const mockData = {
+    students: Array.from({ length: count }, (_, i) => ({
+      _id: `student-${i + 1}`,
+      firstName: ['Alice', 'Bob', 'Carol', 'David', 'Emma'][i % 5],
+      lastName: ['Wilson', 'Davis', 'Miller', 'Garcia', 'Johnson'][i % 5],
+      email: `student${i + 1}@school.com`,
+      studentId: `S2024${String(i + 1).padStart(3, '0')}`,
+      class: ['10A', '10B', '11A', '11B'][i % 4],
+      phone: `+123456789${i}`,
+      status: ['active', 'inactive'][i % 2],
+      createdAt: new Date().toISOString()
+    })),
+    teachers: Array.from({ length: count }, (_, i) => ({
+      _id: `teacher-${i + 1}`,
+      firstName: ['John', 'Sarah', 'Michael', 'Lisa', 'Robert'][i % 5],
+      lastName: ['Smith', 'Johnson', 'Brown', 'Davis', 'Wilson'][i % 5],
+      email: `teacher${i + 1}@school.com`,
+      employeeId: `T${String(i + 1).padStart(3, '0')}`,
+      department: ['Mathematics', 'Science', 'English', 'History'][i % 4],
+      phone: `+123456789${i}`,
+      status: 'active',
+      classes: [2, 3, 1, 4][i % 4],
+      totalStudents: [45, 38, 52, 41][i % 4],
+      createdAt: new Date().toISOString()
+    })),
+    classes: Array.from({ length: count }, (_, i) => ({
+      _id: `class-${i + 1}`,
+      name: `Class ${['10A', '10B', '11A', '11B'][i % 4]}`,
+      grade: ['10', '10', '11', '11'][i % 4],
+      section: ['A', 'B', 'A', 'B'][i % 4],
+      classTeacher: {
+        firstName: ['John', 'Sarah', 'Michael', 'Lisa'][i % 4],
+        lastName: ['Smith', 'Johnson', 'Brown', 'Davis'][i % 4]
+      },
+      subjects: Array.from({ length: 4 }, (_, j) => ({ _id: `subject-${j}` })),
+      studentCount: [32, 28, 35, 30][i % 4],
+      createdAt: new Date().toISOString()
+    })),
+    subjects: Array.from({ length: count }, (_, i) => ({
+      _id: `subject-${i + 1}`,
+      name: ['Mathematics', 'Physics', 'Chemistry', 'English', 'History'][i % 5],
+      code: ['MATH101', 'PHY101', 'CHEM101', 'ENG101', 'HIST101'][i % 5],
+      grade: ['10', '11'][i % 2],
+      teacher: {
+        firstName: ['John', 'Sarah', 'Michael', 'Lisa'][i % 4],
+        lastName: ['Smith', 'Johnson', 'Brown', 'Davis'][i % 4]
+      },
+      weeklyHours: [4, 5, 3, 6][i % 4],
+      enrolledStudents: [120, 98, 145, 87][i % 4],
+      assignmentsCount: [5, 3, 7, 4][i % 4],
+      averageScore: [85, 78, 92, 81][i % 4],
+      createdAt: new Date().toISOString()
+    })),
+    notes: Array.from({ length: count }, (_, i) => ({
+      _id: `note-${i + 1}`,
+      title: ['Algebra Basics', 'Physics Laws', 'Chemical Reactions', 'Grammar Rules'][i % 4],
+      description: 'Comprehensive study material for students',
+      subject: ['Mathematics', 'Physics', 'Chemistry', 'English'][i % 4],
+      class: ['10A', '10B', '11A', '11B'][i % 4],
+      type: ['lecture', 'assignment', 'reference', 'video'][i % 4],
+      uploadedBy: {
+        firstName: ['John', 'Sarah', 'Michael', 'Lisa'][i % 4],
+        lastName: ['Smith', 'Johnson', 'Brown', 'Davis'][i % 4]
+      },
+      views: Math.floor(Math.random() * 100),
+      downloads: Math.floor(Math.random() * 50),
+      fileType: ['pdf', 'doc', 'ppt', 'video'][i % 4],
+      fileSize: '2.5 MB',
+      createdAt: new Date().toISOString()
+    })),
+    assignments: Array.from({ length: count }, (_, i) => ({
+      _id: `assignment-${i + 1}`,
+      title: ['Math Assignment 1', 'Physics Lab Report', 'English Essay', 'History Project'][i % 4],
+      description: 'Complete the assigned tasks and submit before due date',
+      subject: ['Mathematics', 'Physics', 'English', 'History'][i % 4],
+      class: ['10A', '10B', '11A', '11B'][i % 4],
+      teacher: {
+        firstName: ['John', 'Sarah', 'Michael', 'Lisa'][i % 4],
+        lastName: ['Smith', 'Johnson', 'Brown', 'Davis'][i % 4]
+      },
+      dueDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000).toISOString(),
+      points: [100, 50, 75, 80][i % 4],
+      submissionCount: [25, 18, 32, 28][i % 4],
+      totalStudents: [30, 25, 35, 32][i % 4],
+      createdAt: new Date().toISOString()
+    })),
+    grades: Array.from({ length: count }, (_, i) => ({
+      _id: `grade-${i + 1}`,
+      student: {
+        firstName: ['Alice', 'Bob', 'Carol', 'David'][i % 4],
+        lastName: ['Wilson', 'Davis', 'Miller', 'Garcia'][i % 4],
+        studentId: `S2024${String(i + 1).padStart(3, '0')}`
+      },
+      subject: ['Mathematics', 'Physics', 'English', 'History'][i % 4],
+      class: ['10A', '10B', '11A', '11B'][i % 4],
+      assignment: ['Test 1', 'Quiz 2', 'Project', 'Final Exam'][i % 4],
+      score: [85, 92, 78, 88, 95, 73, 89, 91][i % 8],
+      createdAt: new Date().toISOString()
+    })),
+    announcements: Array.from({ length: count }, (_, i) => ({
+      _id: `announcement-${i + 1}`,
+      title: ['School Holiday', 'Parent Meeting', 'Sports Day', 'Exam Schedule'][i % 4],
+      content: 'Important announcement for all students and parents. Please read carefully.',
+      author: {
+        firstName: ['Admin', 'Principal', 'John', 'Sarah'][i % 4],
+        lastName: ['User', 'Smith', 'Teacher', 'Johnson'][i % 4]
+      },
+      priority: ['high', 'medium', 'low'][i % 3],
+      targetAudience: [['all'], ['students'], ['parents'], ['teachers']][i % 4],
+      views: Math.floor(Math.random() * 200),
+      pinned: i < 2,
+      attachments: i % 3 === 0 ? [{ name: 'document.pdf' }] : [],
+      createdAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString()
+    })),
+    fees: Array.from({ length: count }, (_, i) => ({
+      _id: `fee-${i + 1}`,
+      student: {
+        firstName: ['Alice', 'Bob', 'Carol', 'David'][i % 4],
+        lastName: ['Wilson', 'Davis', 'Miller', 'Garcia'][i % 4],
+        studentId: `S2024${String(i + 1).padStart(3, '0')}`,
+        class: ['10A', '10B', '11A', '11B'][i % 4]
+      },
+      type: ['tuition', 'transport', 'meals', 'activities'][i % 4],
+      description: 'Monthly fee payment',
+      amount: [500, 100, 150, 75][i % 4],
+      paidAmount: i % 3 === 0 ? [500, 100, 150, 75][i % 4] : [250, 50, 75, 0][i % 4],
+      status: i % 3 === 0 ? 'paid' : i % 3 === 1 ? 'partial' : 'pending',
+      dueDate: new Date(Date.now() + (i + 1) * 7 * 24 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date().toISOString()
+    })),
+    attendance: Array.from({ length: count }, (_, i) => ({
+      _id: `attendance-${i + 1}`,
+      student: {
+        firstName: ['Alice', 'Bob', 'Carol', 'David'][i % 4],
+        lastName: ['Wilson', 'Davis', 'Miller', 'Garcia'][i % 4],
+        studentId: `S2024${String(i + 1).padStart(3, '0')}`,
+        class: ['10A', '10B', '11A', '11B'][i % 4]
+      },
+      status: ['present', 'absent', 'late', 'excused'][i % 4],
+      timeIn: i % 4 !== 1 ? '09:00' : null,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    }))
+  }
+  
+  return mockData[type] || []
+}
+
+// Mock API functions
 export const authAPI = {
-  login: (credentials) => api.post('/auth/login', credentials),
-  register: (userData) => api.post('/auth/register', userData),
-  verify: () => api.get('/auth/verify'),
-  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
-  resetPassword: (token, password) => api.post('/auth/reset-password', { token, password }),
+  login: (credentials) => Promise.resolve({
+    data: {
+      token: 'mock-jwt-token',
+      user: {
+        _id: '1',
+        firstName: 'John',
+        lastName: 'Admin',
+        email: credentials.email,
+        role: credentials.email.includes('admin') ? 'admin' : 
+              credentials.email.includes('teacher') ? 'teacher' : 
+              credentials.email.includes('student') ? 'student' : 'parent'
+      }
+    }
+  }),
+  register: (userData) => Promise.resolve({ data: { success: true } }),
+  verify: () => Promise.resolve({ data: { user: { _id: '1', firstName: 'John', lastName: 'Admin', role: 'admin' } } })
 }
 
-// Users API
-export const usersAPI = {
-  getAll: (params) => api.get('/users', { params }),
-  getById: (id) => api.get(`/users/${id}`),
-  create: (userData) => api.post('/users', userData),
-  update: (id, userData) => api.put(`/users/${id}`, userData),
-  delete: (id) => api.delete(`/users/${id}`),
-  bulkImport: (file) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    return api.post('/users/bulk-import', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-  },
-}
-
-// Students API
 export const studentsAPI = {
-  getAll: (params) => api.get('/students', { params }),
-  getById: (id) => api.get(`/students/${id}`),
-  create: (studentData) => api.post('/students', studentData),
-  update: (id, studentData) => api.put(`/students/${id}`, studentData),
-  delete: (id) => api.delete(`/students/${id}`),
-  getAttendance: (id, params) => api.get(`/students/${id}/attendance`, { params }),
-  getGrades: (id, params) => api.get(`/students/${id}/grades`, { params }),
+  getAll: (params) => Promise.resolve({ data: { students: generateMockData('students', 15), total: 15, totalPages: 2, currentPage: 1 } }),
+  getById: (id) => Promise.resolve({ data: generateMockData('students', 1)[0] }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-student' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Teachers API
 export const teachersAPI = {
-  getAll: (params) => api.get('/teachers', { params }),
-  getById: (id) => api.get(`/teachers/${id}`),
-  create: (teacherData) => api.post('/teachers', teacherData),
-  update: (id, teacherData) => api.put(`/teachers/${id}`, teacherData),
-  delete: (id) => api.delete(`/teachers/${id}`),
-  getClasses: (id) => api.get(`/teachers/${id}/classes`),
-  getSubjects: (id) => api.get(`/teachers/${id}/subjects`),
+  getAll: (params) => Promise.resolve({ data: { teachers: generateMockData('teachers', 12), total: 12, totalPages: 2, currentPage: 1 } }),
+  getById: (id) => Promise.resolve({ data: generateMockData('teachers', 1)[0] }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-teacher' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Classes API
 export const classesAPI = {
-  getAll: (params) => api.get('/classes', { params }),
-  getById: (id) => api.get(`/classes/${id}`),
-  create: (classData) => api.post('/classes', classData),
-  update: (id, classData) => api.put(`/classes/${id}`, classData),
-  delete: (id) => api.delete(`/classes/${id}`),
-  getStudents: (id) => api.get(`/classes/${id}/students`),
-  getTimetable: (id) => api.get(`/classes/${id}/timetable`),
+  getAll: (params) => Promise.resolve({ data: generateMockData('classes', 8) }),
+  getById: (id) => Promise.resolve({ data: generateMockData('classes', 1)[0] }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-class' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Subjects API
 export const subjectsAPI = {
-  getAll: (params) => api.get('/subjects', { params }),
-  getById: (id) => api.get(`/subjects/${id}`),
-  create: (subjectData) => api.post('/subjects', subjectData),
-  update: (id, subjectData) => api.put(`/subjects/${id}`, subjectData),
-  delete: (id) => api.delete(`/subjects/${id}`),
+  getAll: (params) => Promise.resolve({ data: generateMockData('subjects', 10) }),
+  getById: (id) => Promise.resolve({ data: generateMockData('subjects', 1)[0] }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-subject' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Notes API
 export const notesAPI = {
-  getAll: (params) => api.get('/notes', { params }),
-  getById: (id) => api.get(`/notes/${id}`),
-  create: (formData) => api.post('/notes', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  update: (id, formData) => api.put(`/notes/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  delete: (id) => api.delete(`/notes/${id}`),
+  getAll: (params) => Promise.resolve({ data: generateMockData('notes', 12) }),
+  getById: (id) => Promise.resolve({ data: generateMockData('notes', 1)[0] }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-note' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Attendance API
-export const attendanceAPI = {
-  getAll: (params) => api.get('/attendance', { params }),
-  create: (attendanceData) => api.post('/attendance', attendanceData),
-  update: (id, attendanceData) => api.put(`/attendance/${id}`, attendanceData),
-  delete: (id) => api.delete(`/attendance/${id}`),
-  markBulk: (data) => api.post('/attendance/bulk', data),
-}
-
-// Assignments API
 export const assignmentsAPI = {
-  getAll: (params) => api.get('/assignments', { params }),
-  getById: (id) => api.get(`/assignments/${id}`),
-  create: (formData) => api.post('/assignments', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  update: (id, formData) => api.put(`/assignments/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  delete: (id) => api.delete(`/assignments/${id}`),
-  submit: (id, formData) => api.post(`/assignments/${id}/submit`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  grade: (id, submissionId, gradeData) => api.put(`/assignments/${id}/submissions/${submissionId}/grade`, gradeData),
+  getAll: (params) => Promise.resolve({ data: generateMockData('assignments', 10) }),
+  getById: (id) => Promise.resolve({ data: generateMockData('assignments', 1)[0] }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-assignment' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Grades API
 export const gradesAPI = {
-  getAll: (params) => api.get('/grades', { params }),
-  create: (gradeData) => api.post('/grades', gradeData),
-  update: (id, gradeData) => api.put(`/grades/${id}`, gradeData),
-  delete: (id) => api.delete(`/grades/${id}`),
-  bulkCreate: (gradesData) => api.post('/grades/bulk', gradesData),
+  getAll: (params) => Promise.resolve({ 
+    data: { 
+      grades: generateMockData('grades', 15),
+      stats: { totalStudents: 120, classAverage: 85, highest: 98, lowest: 65 },
+      distribution: [
+        { name: 'A (90-100)', value: 25 },
+        { name: 'B (80-89)', value: 45 },
+        { name: 'C (70-79)', value: 35 },
+        { name: 'D (60-69)', value: 10 },
+        { name: 'F (0-59)', value: 5 }
+      ],
+      letterDistribution: { A: 25, B: 45, C: 35, D: 10, F: 5 }
+    } 
+  }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-grade' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Announcements API
 export const announcementsAPI = {
-  getAll: (params) => api.get('/announcements', { params }),
-  getById: (id) => api.get(`/announcements/${id}`),
-  create: (announcementData) => api.post('/announcements', announcementData),
-  update: (id, announcementData) => api.put(`/announcements/${id}`, announcementData),
-  delete: (id) => api.delete(`/announcements/${id}`),
+  getAll: (params) => Promise.resolve({ data: generateMockData('announcements', 8) }),
+  getById: (id) => Promise.resolve({ data: generateMockData('announcements', 1)[0] }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-announcement' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Calendar API
 export const calendarAPI = {
-  getEvents: (params) => api.get('/calendar/events', { params }),
-  createEvent: (eventData) => api.post('/calendar/events', eventData),
-  updateEvent: (id, eventData) => api.put(`/calendar/events/${id}`, eventData),
-  deleteEvent: (id) => api.delete(`/calendar/events/${id}`),
+  getEvents: (params) => Promise.resolve({ data: [] }),
+  createEvent: (data) => Promise.resolve({ data: { ...data, _id: 'new-event' } }),
+  updateEvent: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  deleteEvent: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Fees API
 export const feesAPI = {
-  getAll: (params) => api.get('/fees', { params }),
-  getById: (id) => api.get(`/fees/${id}`),
-  create: (feeData) => api.post('/fees', feeData),
-  update: (id, feeData) => api.put(`/fees/${id}`, feeData),
-  delete: (id) => api.delete(`/fees/${id}`),
-  pay: (id, paymentData) => api.post(`/fees/${id}/pay`, paymentData),
+  getAll: (params) => Promise.resolve({ 
+    data: { 
+      fees: generateMockData('fees', 12),
+      stats: {
+        totalCollected: 45000,
+        totalPending: 15000,
+        totalOverdue: 5000,
+        collectionRate: 75
+      }
+    } 
+  }),
+  getById: (id) => Promise.resolve({ data: generateMockData('fees', 1)[0] }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-fee' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
 }
 
-// Analytics API
+export const attendanceAPI = {
+  getAll: (params) => Promise.resolve({ 
+    data: { 
+      records: generateMockData('attendance', 15),
+      stats: { total: 120, present: 95, absent: 15, late: 8, excused: 2 }
+    } 
+  }),
+  create: (data) => Promise.resolve({ data: { ...data, _id: 'new-attendance' } }),
+  update: (id, data) => Promise.resolve({ data: { ...data, _id: id } }),
+  delete: (id) => Promise.resolve({ data: { success: true } })
+}
+
 export const analyticsAPI = {
-  getDashboardStats: () => api.get('/analytics/dashboard'),
-  getAttendanceStats: (params) => api.get('/analytics/attendance', { params }),
-  getGradeStats: (params) => api.get('/analytics/grades', { params }),
-  getPerformanceStats: (params) => api.get('/analytics/performance', { params }),
+  getDashboardStats: () => Promise.resolve({
+    data: {
+      totalStudents: 1250,
+      totalTeachers: 85,
+      totalClasses: 45,
+      attendanceRate: 92,
+      attendanceChart: [
+        { name: 'Mon', value: 95 },
+        { name: 'Tue', value: 88 },
+        { name: 'Wed', value: 92 },
+        { name: 'Thu', value: 89 },
+        { name: 'Fri', value: 94 },
+        { name: 'Sat', value: 87 },
+        { name: 'Sun', value: 91 }
+      ],
+      gradeChart: [
+        { name: 'A', value: 25 },
+        { name: 'B', value: 45 },
+        { name: 'C', value: 20 },
+        { name: 'D', value: 8 },
+        { name: 'F', value: 2 }
+      ]
+    }
+  }),
+  getAttendanceStats: (params) => Promise.resolve({
+    data: {
+      averageAttendance: 92,
+      presentToday: 1150,
+      absentToday: 100,
+      lateToday: 25,
+      chartData: [
+        { name: 'Week 1', value: 94 },
+        { name: 'Week 2', value: 91 },
+        { name: 'Week 3', value: 89 },
+        { name: 'Week 4', value: 93 }
+      ]
+    }
+  }),
+  getGradeStats: (params) => Promise.resolve({
+    data: {
+      classAverage: 85,
+      topPerformers: 45,
+      failing: 12,
+      graded: 1200,
+      chartData: [
+        { name: 'A', value: 25 },
+        { name: 'B', value: 45 },
+        { name: 'C', value: 20 },
+        { name: 'D', value: 8 },
+        { name: 'F', value: 2 }
+      ]
+    }
+  }),
+  getPerformanceStats: (params) => Promise.resolve({
+    data: {
+      overallPerformance: 87,
+      improvementRate: 15,
+      atRisk: 25,
+      starPerformers: 35,
+      chartData: [
+        { name: 'Jan', value: 82 },
+        { name: 'Feb', value: 85 },
+        { name: 'Mar', value: 87 },
+        { name: 'Apr', value: 89 }
+      ]
+    }
+  })
 }
 
 export default api

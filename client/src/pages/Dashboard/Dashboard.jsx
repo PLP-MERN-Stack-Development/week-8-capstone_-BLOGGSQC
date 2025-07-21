@@ -206,21 +206,21 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-96">
+        <LoadingSpinner size="large" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold">
+      <div className="glass-card bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 border border-neon-blue/30 glow-blue animate-slide-up">
+        <h1 className="text-3xl font-bold gradient-text">
           {getGreeting()}, {user?.firstName}!
         </h1>
-        <p className="mt-1 text-blue-100">
-          Welcome back to your {user?.role} dashboard
+        <p className="mt-2 text-gray-300 text-lg">
+          Welcome back to your <span className="text-gold-400 font-semibold capitalize">{user?.role}</span> dashboard
         </p>
       </div>
 

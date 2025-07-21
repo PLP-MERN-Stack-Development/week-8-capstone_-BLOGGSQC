@@ -1,21 +1,25 @@
 const LoadingSpinner = ({ size = 'medium', color = 'blue' }) => {
   const sizeClasses = {
-    small: 'h-4 w-4',
-    medium: 'h-8 w-8',
-    large: 'h-12 w-12',
+    small: 'h-6 w-6',
+    medium: 'h-10 w-10',
+    large: 'h-16 w-16',
   }
 
   const colorClasses = {
-    blue: 'border-blue-600',
+    blue: 'border-neon-blue',
     white: 'border-white',
-    gray: 'border-gray-600',
+    gray: 'border-gray-400',
   }
 
   return (
-    <div className="flex justify-center items-center">
+    <div className="flex flex-col justify-center items-center space-y-4">
       <div 
-        className={`animate-spin rounded-full border-2 border-t-transparent ${sizeClasses[size]} ${colorClasses[color]}`}
+        className={`animate-spin rounded-full border-2 border-t-transparent ${sizeClasses[size]} ${colorClasses[color]} glow-blue`}
       ></div>
+      <div className="text-center">
+        <p className="text-white font-medium">Loading...</p>
+        <p className="text-gray-400 text-sm">Please wait</p>
+      </div>
     </div>
   )
 }

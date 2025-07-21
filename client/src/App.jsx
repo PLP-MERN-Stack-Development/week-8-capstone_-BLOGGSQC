@@ -22,11 +22,15 @@ function App() {
   const { user, loading } = useAuth()
 
   if (loading) {
-    return <LoadingSpinner />
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
       <Routes>
         <Route 
           path="/login" 
@@ -57,12 +61,4 @@ function App() {
   )
 }
 
-import Home from './pages/Home/Home';
-
-function App() {
-  return (
-    <Home />
-  );
-}
-
-export default App;
+export default App

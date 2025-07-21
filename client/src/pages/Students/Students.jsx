@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { studentsAPI } from '../../services/api'
-import { Plus, Search, Filter, Download, Upload, MoreHorizontal } from 'lucide-react'
+import { Plus, Search, Filter, Download, Upload, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const Students = () => {
@@ -12,6 +12,7 @@ const Students = () => {
   })
   const [page, setPage] = useState(1)
   const [showModal, setShowModal] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState(null)
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['students', { search, filters, page }],
@@ -27,35 +28,58 @@ const Students = () => {
   const students = data?.students || []
   const totalPages = data?.totalPages || 1
 
+  const handleEdit = (student) => {
+    setSelectedStudent(student)
+    setShowModal(true)
+  }
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this student?')) {
+      try {
+        await studentsAPI.delete(id)
+        toast.success('Student deleted successfully!')
+        refetch()
+      } catch (error) {
+        toast.error('Failed to delete student')
+      }
+    }
+  }
+
+  const handleView = (student) => {
+    toast.success(`Viewing ${student.firstName} ${student.lastName}'s profile`)
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Students</h1>
-          <p className="text-gray-600">Manage student records and information</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-            <Upload className="h-4 w-4" />
-            Import
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-            <Download className="h-4 w-4" />
-            Export
-          </button>
-          <button 
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4" />
-            Add Student
-          </button>
+      <div className="glass-card bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 border border-neon-blue/30 glow-blue animate-slide-up">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold gradient-text">Students</h1>
+            <p className="text-gray-300 text-lg">Manage student records and information</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="futuristic-button flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Import
+            </button>
+            <button className="futuristic-button flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Export
+            </button>
+            <button 
+              onClick={() => setShowModal(true)}
+              className="futuristic-button-primary flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Student
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <div className="glass-card animate-slide-up">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
@@ -65,7 +89,7 @@ const Students = () => {
                 placeholder="Search students..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="futuristic-input w-full pl-10"
               />
             </div>
           </div>
@@ -73,7 +97,7 @@ const Students = () => {
             <select
               value={filters.class}
               onChange={(e) => setFilters({ ...filters, class: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="futuristic-input"
             >
               <option value="">All Classes</option>
               <option value="10A">Class 10A</option>
@@ -84,7 +108,7 @@ const Students = () => {
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="futuristic-input"
             >
               <option value="">All Status</option>
               <option value="active">Active</option>
@@ -95,114 +119,156 @@ const Students = () => {
         </div>
       </div>
 
-      {/* Students Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {/* Students Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-500">Loading students...</p>
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Student
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Student ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Class
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Contact
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {students.map((student) => (
-                    <tr key={student._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <span className="text-blue-600 font-medium text-sm">
-                              {student.firstName?.[0]}{student.lastName?.[0]}
-                            </span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {student.firstName} {student.lastName}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {student.email}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student.studentId}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student.class}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {student.phone}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          student.status === 'active' ? 'bg-green-100 text-green-800' :
-                          student.status === 'inactive' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {student.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <MoreHorizontal className="h-5 w-5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
-                <div className="text-sm text-gray-500">
-                  Showing page {page} of {totalPages}
+          Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="glass-card animate-pulse">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <div className="h-12 w-12 bg-gray-600 rounded-full"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-600 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-600 rounded w-1/2"></div>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-600 rounded"></div>
+                  <div className="h-3 bg-gray-600 rounded w-2/3"></div>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          students.map((student) => (
+            <div key={student._id} className="glass-card hover:scale-105 transition-all duration-300 animate-slide-up">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="h-12 w-12 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple flex items-center justify-center glow-blue">
+                    <span className="text-white font-bold text-sm">
+                      {student.firstName?.[0]}{student.lastName?.[0]}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">
+                      {student.firstName} {student.lastName}
+                    </h3>
+                    <p className="text-sm text-gray-400">{student.studentId}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
                   <button
-                    onClick={() => setPage(page - 1)}
-                    disabled={page === 1}
-                    className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+                    onClick={() => handleView(student)}
+                    className="p-2 text-gray-400 hover:text-neon-blue hover:bg-white/10 rounded-lg transition-all duration-200"
                   >
-                    Previous
+                    <Eye className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => setPage(page + 1)}
-                    disabled={page === totalPages}
-                    className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+                    onClick={() => handleEdit(student)}
+                    className="p-2 text-gray-400 hover:text-neon-green hover:bg-white/10 rounded-lg transition-all duration-200"
                   >
-                    Next
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(student._id)}
+                    className="p-2 text-gray-400 hover:text-neon-pink hover:bg-white/10 rounded-lg transition-all duration-200"
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
-            )}
-          </>
+
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Class:</span>
+                  <span className="text-white font-medium">{student.class}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Email:</span>
+                  <span className="text-white font-medium">{student.email}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Phone:</span>
+                  <span className="text-white font-medium">{student.phone}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Status:</span>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    student.status === 'active' 
+                      ? 'bg-neon-green/20 text-neon-green border border-neon-green/30' 
+                      : 'bg-neon-pink/20 text-neon-pink border border-neon-pink/30'
+                  }`}>
+                    {student.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => handleView(student)}
+                    className="flex-1 futuristic-button text-sm"
+                  >
+                    View Profile
+                  </button>
+                  <button 
+                    onClick={() => handleEdit(student)}
+                    className="flex-1 futuristic-button-primary text-sm"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
         )}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="glass-card">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-400">
+              Showing page {page} of {totalPages}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+                className="futuristic-button disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPages}
+                className="futuristic-button disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="glass-card text-center">
+          <div className="text-3xl font-bold gradient-text">{students.length}</div>
+          <div className="text-sm text-gray-400">Total Students</div>
+        </div>
+        <div className="glass-card text-center">
+          <div className="text-3xl font-bold text-neon-green">{students.filter(s => s.status === 'active').length}</div>
+          <div className="text-sm text-gray-400">Active</div>
+        </div>
+        <div className="glass-card text-center">
+          <div className="text-3xl font-bold text-neon-pink">{students.filter(s => s.status === 'inactive').length}</div>
+          <div className="text-sm text-gray-400">Inactive</div>
+        </div>
+        <div className="glass-card text-center">
+          <div className="text-3xl font-bold text-gold-400">4</div>
+          <div className="text-sm text-gray-400">Classes</div>
+        </div>
       </div>
     </div>
   )
