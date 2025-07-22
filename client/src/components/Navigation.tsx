@@ -1,90 +1,115 @@
-import { useState } from 'react';
-import { GraduationCap, Menu, X, Users, BookOpen, Calendar, BarChart3 } from 'lucide-react';
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import { GraduationCap, Menu, X } from 'lucide-react'
 
-export default function Navigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const Navigation: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false)
 
-  const menuItems = [
-    { icon: Users, label: 'Students', href: '#students' },
-    { icon: BookOpen, label: 'Teachers', href: '#teachers' },
-    { icon: Calendar, label: 'Schedule', href: '#schedule' },
-    { icon: BarChart3, label: 'Analytics', href: '#analytics' },
-  ];
+  const navItems = [
+    { name: 'Home', href: '/' },
+    { name: 'Features', href: '#features' },
+    { name: 'About', href: '#about' },
+    { name: 'Contact', href: '#contact' },
+  ]
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-yellow-500">
-      <div className="container mx-auto px-4">
+    <motion.nav
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-gray-700/50"
+    >
+      <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-yellow-500 rounded-lg">
-              <GraduationCap className="h-6 w-6 text-black" />
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-gold rounded-xl flex items-center justify-center neon-glow-gold">
+              <GraduationCap className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-yellow-400">SmartSchool</span>
-          </div>
+            <span className="text-xl font-bold text-white">EduTech Pro</span>
+          </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-6">
-            {menuItems.map((item) => (
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {navItems.map((item) => (
               <a
-                key={item.label}
+                key={item.name}
                 href={item.href}
-                className="flex items-center space-x-2 text-gray-300 hover:text-yellow-400 transition-colors"
+                className="text-gray-300 hover:text-primary-500 transition-colors font-medium"
               >
-                <item.icon className="h-4 w-4" />
-                <span>{item.label}</span>
+                {item.name}
               </a>
             ))}
           </div>
 
-          {/* Desktop Login Button */}
-          <div className="hidden md:block">
-            <button
-              onClick={() => alert('Get Started!')}
-              className="px-4 py-2 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition"
-            >
-              Get Started
-            </button>
+          {/* Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Link to="/login">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="glass text-white px-6 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors"
+              >
+                Login
+              </motion.button>
+            </Link>
+            <Link to="/login">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-gradient-gold text-white px-6 py-2 rounded-lg font-medium neon-glow-gold"
+              >
+                Get Started
+              </motion.button>
+            </Link>
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile menu button */}
           <button
-            className="md:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden text-white"
           >
-            {isMenuOpen ? (
-              <X className="h-6 w-6 text-yellow-400" />
-            ) : (
-              <Menu className="h-6 w-6 text-yellow-400" />
-            )}
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-yellow-500 animate-fade-in">
-            <div className="flex flex-col space-y-4">
-              {menuItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center space-x-2 text-gray-300 hover:text-yellow-400 transition-colors py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.label}</span>
-                </a>
-              ))}
-              <button
-                onClick={() => alert('Get Started!')}
-                className="w-full mt-4 px-4 py-2 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition"
+        {/* Mobile Navigation */}
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ 
+            opacity: isOpen ? 1 : 0, 
+            height: isOpen ? 'auto' : 0 
+          }}
+          className="md:hidden overflow-hidden"
+        >
+          <div className="py-4 space-y-4">
+            {navItems.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                className="block text-gray-300 hover:text-primary-500 transition-colors font-medium"
+                onClick={() => setIsOpen(false)}
               >
-                Get Started
-              </button>
+                {item.name}
+              </a>
+            ))}
+            <div className="pt-4 space-y-3">
+              <Link to="/login" className="block">
+                <button className="w-full glass text-white px-6 py-2 rounded-lg font-medium">
+                  Login
+                </button>
+              </Link>
+              <Link to="/login" className="block">
+                <button className="w-full bg-gradient-gold text-white px-6 py-2 rounded-lg font-medium">
+                  Get Started
+                </button>
+              </Link>
             </div>
           </div>
-        )}
+        </motion.div>
       </div>
-    </nav>
-  );
+    </motion.nav>
+  )
 }
+
+export default Navigation

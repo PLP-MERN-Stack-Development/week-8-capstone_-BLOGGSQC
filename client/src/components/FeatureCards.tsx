@@ -1,59 +1,111 @@
-import { Users, BookOpen, Calendar, Shield, ArrowRight } from 'lucide-react';
+import React from 'react'
+import { motion } from 'framer-motion'
+import { 
+  Users, 
+  BookOpen, 
+  BarChart3, 
+  MessageCircle, 
+  Shield, 
+  Smartphone,
+  Clock,
+  Globe
+} from 'lucide-react'
 
-export default function FeatureCards() {
-  const cards = [
+const FeatureCards: React.FC = () => {
+  const features = [
     {
-      icon: Shield,
-      title: 'Administrators',
-      description: 'Complete school management with advanced analytics.',
-      features: ['User Management', 'Analytics Dashboard', 'Reports'],
+      icon: Users,
+      title: 'Student Management',
+      description: 'Comprehensive student profiles, enrollment tracking, and academic progress monitoring',
+      color: 'from-blue-500 to-cyan-500'
     },
     {
       icon: BookOpen,
-      title: 'Teachers',
-      description: 'Upload notes, manage classes, project content.',
-      features: ['Upload Materials', 'Class Management', 'Grading'],
+      title: 'Academic Excellence',
+      description: 'Advanced curriculum management, grade tracking, and assessment tools',
+      color: 'from-green-500 to-emerald-500'
     },
     {
-      icon: Users,
-      title: 'Students',
-      description: 'Access learning materials, submit assignments.',
-      features: ['Course Materials', 'Assignments', 'Grades'],
+      icon: BarChart3,
+      title: 'Analytics & Insights',
+      description: 'Real-time reporting, performance analytics, and predictive insights',
+      color: 'from-purple-500 to-pink-500'
     },
-  ];
+    {
+      icon: MessageCircle,
+      title: 'Communication Hub',
+      description: 'Seamless communication between teachers, students, and parents',
+      color: 'from-orange-500 to-red-500'
+    },
+    {
+      icon: Shield,
+      title: 'Enterprise Security',
+      description: 'GDPR & FERPA compliant with advanced security and privacy controls',
+      color: 'from-indigo-500 to-blue-500'
+    },
+    {
+      icon: Smartphone,
+      title: 'Mobile Ready',
+      description: 'Fully responsive design with native mobile app experience',
+      color: 'from-teal-500 to-green-500'
+    },
+    {
+      icon: Clock,
+      title: 'Real-time Updates',
+      description: 'Instant notifications and live data synchronization across all devices',
+      color: 'from-yellow-500 to-orange-500'
+    },
+    {
+      icon: Globe,
+      title: 'Global Access',
+      description: 'Cloud-based platform accessible from anywhere in the world',
+      color: 'from-pink-500 to-purple-500'
+    },
+  ]
 
   return (
-    <section className="py-20 bg-gray-900 text-white">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-yellow-400 mb-8">
-          Choose Your Role
-        </h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {cards.map((card, i) => (
-            <div
-              key={i}
-              className="bg-black/80 border border-yellow-500 rounded-lg p-6 hover:scale-105 transition-transform"
+    <section className="py-20 px-4" id="features">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Comprehensive School Management Features
+          </h2>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Everything you need to run a modern educational institution efficiently and effectively
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+              whileHover={{ scale: 1.05, y: -10 }}
+              className="glass rounded-2xl p-6 group hover:neon-glow transition-all duration-300"
             >
-              <div className="flex items-center justify-center w-16 h-16 bg-yellow-500 rounded-full mb-4 mx-auto">
-                <card.icon className="h-8 w-8 text-black" />
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg`}>
+                <feature.icon className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-center mb-2">{card.title}</h3>
-              <p className="text-gray-400 text-center mb-4">{card.description}</p>
-              <ul className="text-sm text-gray-300 mb-4 space-y-1">
-                {card.features.map((f) => (
-                  <li key={f}>✅ {f}</li>
-                ))}
-              </ul>
-              <button
-                onClick={() => alert(`Accessing ${card.title} Portal`)}
-                className="w-full px-4 py-2 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition flex justify-center items-center"
-              >
-                Access Portal <ArrowRight className="ml-2 h-4 w-4" />
-              </button>
-            </div>
+              
+              <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-primary-500 transition-colors">
+                {feature.title}
+              </h3>
+              
+              <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
+                {feature.description}
+              </p>
+            </motion.div>
           ))}
         </div>
       </div>
     </section>
-  );
+  )
 }
+
+export default FeatureCards

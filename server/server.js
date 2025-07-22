@@ -1,53 +1,50 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import compression from 'compression';
-import rateLimit from 'express-rate-limit';
-import fileUpload from 'express-fileupload';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import dotenv from 'dotenv';
-
-// Import database connection
-import connectDB from './config/database.js';
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+require('dotenv').config();
 
 // Import routes
-import authRoutes from './routes/auth.js';
-import userRoutes from './routes/users.js';
-import studentRoutes from './routes/students.js';
-import teacherRoutes from './routes/teachers.js';
-import classRoutes from './routes/classes.js';
-import subjectRoutes from './routes/subjects.js';
-import noteRoutes from './routes/notes.js';
-import attendanceRoutes from './routes/attendance.js';
-import assignmentRoutes from './routes/assignments.js';
-import gradeRoutes from './routes/grades.js';
-import announcementRoutes from './routes/announcements.js';
-import calendarRoutes from './routes/calendar.js';
-import feeRoutes from './routes/fees.js';
-import analyticsRoutes from './routes/analytics.js';
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const studentRoutes = require('./routes/students');
+const teacherRoutes = require('./routes/teachers');
+const classRoutes = require('./routes/classes');
+const subjectRoutes = require('./routes/subjects');
+const attendanceRoutes = require('./routes/attendance');
+const assignmentRoutes = require('./routes/assignments');
+const noteRoutes = require('./routes/notes');
+const announcementRoutes = require('./routes/announcements');
+const analyticsRoutes = require('./routes/analytics');
+const calendarRoutes = require('./routes/calendar');
+const dashboardRoutes = require('./routes/dashboard');
 
 // Import middleware
-import { errorHandler } from './middleware/errorHandler.js';
-import { notFound } from './middleware/notFound.js';
-
-// Load environment variables
-dotenv.config();
-
-// Connect to database
-connectDB();
+const errorHandler = require('./middleware/errorHandler');
+const { connectDB } = require('./config/database');
 
 const app = express();
-const server = createServer(app);
+const httpServer = createServer(app);
 
-// Socket.IO setup
-const io = new Server(server, {
+// Initialize Socket.IO for real-time features
+const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
+
+// Connect to MongoDB
+connectDB();
+
+// Security middleware
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -57,18 +54,13 @@ const limiter = rateLimit({
     error: 'Too many requests from this IP, please try again later.'
   }
 });
-
-// Middleware
-app.use(helmet());
-app.use(compression());
-app.use(morgan('combined'));
-app.use(limiter);
+app.use('/api/', limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: process.env.FRONTEND_URL || "http://localhost:3000",
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -76,18 +68,14 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// File upload middleware
-app.use(fileUpload({
-  useTempFiles: true,
-  tempFileDir: '/tmp/',
-  limits: { fileSize: 50 * 1024 * 1024 },
-}));
+// Static file serving
+app.use('/uploads', express.static('uploads'));
 
-// Health check route
+// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'success',
-    message: 'School Management System API is running',
+    message: 'EduTech Pro Server is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV
   });
@@ -100,23 +88,32 @@ app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/subjects', subjectRoutes);
-app.use('/api/notes', noteRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/assignments', assignmentRoutes);
-app.use('/api/grades', gradeRoutes);
+app.use('/api/notes', noteRoutes);
 app.use('/api/announcements', announcementRoutes);
-app.use('/api/calendar', calendarRoutes);
-app.use('/api/fees', feeRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  socket.on('join-room', (data) => {
-    const { userId, role } = data;
-    socket.join(`${role}-${userId}`);
-    socket.join(role);
+  // Join user to their role-specific room
+  socket.on('join_room', (data) => {
+    socket.join(data.room);
+    console.log(`User ${socket.id} joined room: ${data.room}`);
+  });
+
+  // Handle real-time notifications
+  socket.on('send_notification', (data) => {
+    socket.to(data.room).emit('receive_notification', data);
+  });
+
+  // Handle real-time announcements
+  socket.on('send_announcement', (data) => {
+    io.emit('receive_announcement', data);
   });
 
   socket.on('disconnect', () => {
@@ -124,17 +121,45 @@ io.on('connection', (socket) => {
   });
 });
 
-// Make io accessible to routes
+// Make io available to routes
 app.set('io', io);
 
-// Error handling middleware
-app.use(notFound);
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    status: 'error',
+    message: `Route ${req.originalUrl} not found`
+  });
+});
+
+// Global error handling middleware
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+httpServer.listen(PORT, () => {
+  console.log(`
+🚀 EduTech Pro Server is running!
+📡 Port: ${PORT}
+🌍 Environment: ${process.env.NODE_ENV}
+📊 Database: ${process.env.DB_NAME}
+⚡ Socket.IO: Enabled
+🔒 Security: Enhanced
+  `);
 });
 
-export default app;
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Promise Rejection:', err);
+  httpServer.close(() => {
+    process.exit(1);
+  });
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+module.exports = app;
