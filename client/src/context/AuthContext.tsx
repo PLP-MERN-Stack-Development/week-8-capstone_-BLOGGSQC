@@ -8,6 +8,7 @@ interface User {
   email: string
   role: 'admin' | 'teacher' | 'student' | 'parent'
   avatar?: string
+  isActive?: boolean
 }
 
 interface AuthState {
@@ -70,7 +71,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAuth = async (token: string) => {
     try {
       const response = await authAPI.validateToken(token)
-      dispatch({ type: 'SET_USER', payload: response.data.user })
+      // ✅ backend returns user inside data.user
+      const user = response.data.data.user
+      dispatch({ type: 'SET_USER', payload: user })
     } catch (error) {
       localStorage.removeItem('token')
       dispatch({ type: 'SET_LOADING', payload: false })
@@ -81,7 +84,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
       const response = await authAPI.login({ email, password })
-      const { user, token } = response.data
+      // ✅ Fix: destructure from response.data.data
+      const { user, token } = response.data.data
 
       localStorage.setItem('token', token)
       dispatch({ type: 'SET_USER', payload: user })
@@ -97,7 +101,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
       const response = await authAPI.register(userData)
-      const { user, token } = response.data
+      // ✅ Fix: backend wraps in data
+      const { user, token } = response.data.data
 
       localStorage.setItem('token', token)
       dispatch({ type: 'SET_USER', payload: user })

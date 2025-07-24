@@ -8,24 +8,6 @@ Before setting up the School Management System, ensure you have the following in
 - **MongoDB Atlas Account** - [Sign up here](https://www.mongodb.com/atlas)
 - **Cloudinary Account** (for file uploads) - [Sign up here](https://cloudinary.com/)
 - **Git** - [Download here](https://git-scm.com/)
-- **VS Code** (recommended) - [Download here](https://code.visualstudio.com/)
-
-## 🛠️ VS Code Setup
-
-### Recommended Extensions
-Install these VS Code extensions for the best development experience:
-
-```bash
-# Essential Extensions
-- ES7+ React/Redux/React-Native snippets
-- TypeScript Importer
-- Tailwind CSS IntelliSense
-- Auto Rename Tag
-- Bracket Pair Colorizer
-- GitLens
-- Thunder Client (for API testing)
-- MongoDB for VS Code
-```
 
 ### VS Code Settings
 Add these settings to your VS Code `settings.json`:

@@ -32,7 +32,8 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    match: [/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number']
+    required: [true, 'Phone number is required'],
+    match: [/^(?:\+254|0)(7\d{8})$/, 'Please enter a valid phone number']
   },
   address: {
     street: String,
@@ -155,7 +156,6 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 
 // Method to handle failed login attempts
 userSchema.methods.incLoginAttempts = function() {
-  // If we have a previous lock that has expired, restart at 1
   if (this.lockUntil && this.lockUntil < Date.now()) {
     return this.updateOne({
       $set: { loginAttempts: 1 },
@@ -164,8 +164,7 @@ userSchema.methods.incLoginAttempts = function() {
   }
 
   const updates = { $inc: { loginAttempts: 1 } };
-  
-  // Lock account after 5 failed attempts for 2 hours
+
   if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
     updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 }; // 2 hours
   }
@@ -207,7 +206,7 @@ userSchema.methods.generateAuthToken = function() {
 // Static method to find by credentials
 userSchema.statics.findByCredentials = async function(email, password) {
   const user = await this.findOne({ email }).select('+password');
-  
+
   if (!user) {
     throw new Error('Invalid email or password');
   }
@@ -221,18 +220,16 @@ userSchema.statics.findByCredentials = async function(email, password) {
   }
 
   const isMatch = await user.comparePassword(password);
-  
+
   if (!isMatch) {
     await user.incLoginAttempts();
     throw new Error('Invalid email or password');
   }
 
-  // Reset login attempts on successful login
   if (user.loginAttempts > 0) {
     await user.resetLoginAttempts();
   }
 
-  // Update last login
   user.lastLogin = new Date();
   await user.save();
 

@@ -31,12 +31,13 @@ const Login: React.FC = () => {
       await login(formData.email, formData.password)
       navigate('/dashboard')
     } catch (error) {
-      // Error is already handled in the auth context
+      // handled in AuthContext
     } finally {
       setIsLoading(false)
     }
   }
 
+  // ✅ Updated credentials to match backend
   const demoCredentials = [
     { role: 'Admin', email: 'admin@edutech-pro.com', password: 'Admin123!' },
     { role: 'Teacher', email: 'sarah.johnson@edutech-pro.com', password: 'Teacher123!' },
@@ -46,6 +47,7 @@ const Login: React.FC = () => {
 
   const fillDemoCredentials = (email: string, password: string) => {
     setFormData({ email, password })
+    toast.success(`Filled ${email}`)
   }
 
   return (
@@ -70,7 +72,6 @@ const Login: React.FC = () => {
           >
             <GraduationCap className="h-8 w-8 text-white" />
           </motion.div>
-          
           <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
           <p className="text-gray-400">Sign in to your EduTech Pro account</p>
         </div>
@@ -195,7 +196,6 @@ const Login: React.FC = () => {
               Contact Administrator
             </button>
           </p>
-          
           <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
             <button className="hover:text-gray-400 transition-colors">Privacy Policy</button>
             <span>•</span>

@@ -1,6 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  // ✅ Enable dark mode using the 'class' strategy
+  darkMode: 'class',
+
+  // ✅ Scan these files for class names
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+  ],
+
   theme: {
     extend: {
       colors: {
@@ -24,36 +32,47 @@ export default {
           cyan: '#00ffff',
           pink: '#ff00ff',
           green: '#00ff00',
-        }
+        },
       },
+
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+        'gradient-conic':
+          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'glass':
+          'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
       },
+
       backdropBlur: {
         xs: '2px',
       },
+
       animation: {
-        'float': 'float 6s ease-in-out infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
-        'shimmer': 'shimmer 2s linear infinite',
+        float: 'float 6s ease-in-out infinite',
+        glow: 'glow 2s ease-in-out infinite alternate',
+        shimmer: 'shimmer 2s linear infinite',
       },
+
       keyframes: {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-20px)' }
+          '50%': { transform: 'translateY(-20px)' },
         },
         glow: {
-          'from': { boxShadow: '0 0 20px #00ffff' },
-          'to': { boxShadow: '0 0 30px #00ffff, 0 0 40px #00ffff' }
+          from: { boxShadow: '0 0 20px #00ffff' },
+          to: { boxShadow: '0 0 30px #00ffff, 0 0 40px #00ffff' },
         },
         shimmer: {
           '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' }
-        }
-      }
+          '100%': { transform: 'translateX(100%)' },
+        },
+      },
     },
   },
-  plugins: [],
-}
+
+  plugins: [
+    // ✅ Add Tailwind official plugins if needed
+    // require('@tailwindcss/forms'),
+    // require('@tailwindcss/typography'),
+  ],
+};

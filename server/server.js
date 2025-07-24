@@ -7,7 +7,9 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
-// Import routes
+// ======================
+// ✅ Import routes
+// ======================
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const studentRoutes = require('./routes/students');
@@ -22,33 +24,48 @@ const analyticsRoutes = require('./routes/analytics');
 const calendarRoutes = require('./routes/calendar');
 const dashboardRoutes = require('./routes/dashboard');
 
-// Import middleware
+// ======================
+// ✅ Import middleware
+// ======================
 const errorHandler = require('./middleware/errorHandler');
 const { connectDB } = require('./config/database');
 
+// ======================
+// ✅ App and Server
+// ======================
 const app = express();
 const httpServer = createServer(app);
 
-// Initialize Socket.IO for real-time features
+// ======================
+// ✅ Socket.IO with CLIENT_URL
+// ======================
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    methods: ["GET", "POST"],
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    methods: ['GET', 'POST'],
     credentials: true
   }
 });
 
-// Connect to MongoDB
+// ======================
+// ✅ Connect to MongoDB
+// ======================
 connectDB();
 
-// Security middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+// ======================
+// ✅ Security middleware
+// ======================
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
 
-// Rate limiting
+// ======================
+// ✅ Rate limiting
+// ======================
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 mins
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
   message: {
     error: 'Too many requests from this IP, please try again later.'
@@ -56,22 +73,32 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// ======================
+// ✅ CORS with CLIENT_URL
+// ======================
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  })
+);
 
-// Body parsing middleware
+// ======================
+// ✅ Body parsers
+// ======================
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Static file serving
+// ======================
+// ✅ Static files
+// ======================
 app.use('/uploads', express.static('uploads'));
 
-// Health check endpoint
+// ======================
+// ✅ Health Check
+// ======================
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -81,7 +108,9 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
+// ======================
+// ✅ API Routes
+// ======================
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/students', studentRoutes);
@@ -96,35 +125,39 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-// Socket.IO connection handling
+// ======================
+// ✅ Socket.IO Handlers
+// ======================
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+  console.log('✅ User connected:', socket.id);
 
-  // Join user to their role-specific room
+  // Join specific room
   socket.on('join_room', (data) => {
     socket.join(data.room);
-    console.log(`User ${socket.id} joined room: ${data.room}`);
+    console.log(`ℹ️ User ${socket.id} joined room: ${data.room}`);
   });
 
-  // Handle real-time notifications
+  // Notifications
   socket.on('send_notification', (data) => {
     socket.to(data.room).emit('receive_notification', data);
   });
 
-  // Handle real-time announcements
+  // Announcements
   socket.on('send_announcement', (data) => {
     io.emit('receive_announcement', data);
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+    console.log('❌ User disconnected:', socket.id);
   });
 });
 
-// Make io available to routes
+// Make io available in routes
 app.set('io', io);
 
-// 404 handler
+// ======================
+// ✅ 404 handler
+// ======================
 app.use('*', (req, res) => {
   res.status(404).json({
     status: 'error',
@@ -132,9 +165,14 @@ app.use('*', (req, res) => {
   });
 });
 
-// Global error handling middleware
+// ======================
+// ✅ Global error handler
+// ======================
 app.use(errorHandler);
 
+// ======================
+// ✅ Start server
+// ======================
 const PORT = process.env.PORT || 5000;
 
 httpServer.listen(PORT, () => {
@@ -142,23 +180,25 @@ httpServer.listen(PORT, () => {
 🚀 EduTech Pro Server is running!
 📡 Port: ${PORT}
 🌍 Environment: ${process.env.NODE_ENV}
-📊 Database: ${process.env.DB_NAME}
+📊 Database: ${process.env.MONGODB_DB_NAME}
 ⚡ Socket.IO: Enabled
 🔒 Security: Enhanced
+✅ CORS Origin: ${process.env.CLIENT_URL || 'http://localhost:5173'}
   `);
 });
 
-// Handle unhandled promise rejections
+// ======================
+// ✅ Process error handlers
+// ======================
 process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Promise Rejection:', err);
+  console.error('🔥 Unhandled Promise Rejection:', err);
   httpServer.close(() => {
     process.exit(1);
   });
 });
 
-// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
+  console.error('🔥 Uncaught Exception:', err);
   process.exit(1);
 });
 
