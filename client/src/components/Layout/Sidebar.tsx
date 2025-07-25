@@ -1,12 +1,12 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { NavLink, useLocation } from 'react-router-dom'
-import { 
-  X, 
-  LayoutDashboard, 
-  Users, 
-  GraduationCap, 
-  BookOpen, 
+import {
+  X,
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  BookOpen,
   Calendar,
   ClipboardCheck,
   FileText,
@@ -28,7 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['admin', 'teacher', 'student', 'parent'] },
     { icon: Users, label: 'Students', path: '/students', roles: ['admin', 'teacher'] },
-    { icon: GraduationCap, label: 'Teachers', path: '/teachers', roles: ['admin'] },
+    { icon: GraduationCap, label: 'Teachers', path: '/teachers', roles: ['admin', 'teacher'] },
     { icon: Building2, label: 'Classes', path: '/classes', roles: ['admin', 'teacher'] },
     { icon: BookOpen, label: 'Subjects', path: '/subjects', roles: ['admin', 'teacher', 'student'] },
     { icon: ClipboardCheck, label: 'Attendance', path: '/attendance', roles: ['admin', 'teacher', 'student'] },
@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { icon: Calendar, label: 'Calendar', path: '/calendar', roles: ['admin', 'teacher', 'student', 'parent'] },
   ]
 
-  const filteredMenuItems = menuItems.filter(item => 
+  const filteredMenuItems = menuItems.filter(item =>
     user && item.roles.includes(user.role)
   )
 
@@ -68,7 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between p-6 border-b border-gray-700/50">
-            <motion.div 
+            <motion.div
               className="flex items-center space-x-3"
               whileHover={{ scale: 1.05 }}
             >
@@ -80,10 +80,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <p className="text-xs text-gray-400">School Management</p>
               </div>
             </motion.div>
-            
+
             <button
               onClick={onClose}
               className="lg:hidden text-gray-400 hover:text-white transition-colors"
+              aria-label="Close sidebar"
+              title="Close sidebar"
             >
               <X className="h-5 w-5" />
             </button>

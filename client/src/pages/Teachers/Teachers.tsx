@@ -1,46 +1,47 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery } from 'react-query'
-import { 
-  GraduationCap, 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  Edit, 
-  Trash2, 
+import {
+  GraduationCap,
+  Plus,
+  Search,
+  Filter,
+  Download,
+  Edit,
+  Trash2,
   Eye,
   Mail,
   Phone,
   BookOpen,
   Users,
   Award,
-  Calendar
 } from 'lucide-react'
 import { teachersAPI } from '../../services/api'
+import { useAuth } from '../../hooks/useAuth'
 
 const Teachers: React.FC = () => {
+  const { hasPermission } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [showAddModal, setShowAddModal] = useState(false)
 
-  // Fetch teachers data
   const { data: teachersData, isLoading, refetch } = useQuery(
     ['teachers', currentPage, searchTerm, selectedDepartment],
-    () => teachersAPI.getAll({
-      page: currentPage,
-      search: searchTerm,
-      department: selectedDepartment
-    }),
+    () =>
+      teachersAPI.getAll({
+        page: currentPage,
+        search: searchTerm,
+        department: selectedDepartment,
+      }),
     {
-      keepPreviousData: true
+      keepPreviousData: true,
     }
   )
 
   const teachers = teachersData?.data?.teachers || []
 
-  // Mock data for demonstration
+  // mock data
   const mockTeachers = [
     {
       _id: '1',
@@ -48,7 +49,9 @@ const Teachers: React.FC = () => {
         name: 'Dr. Sarah Johnson',
         email: 'sarah.johnson@edutech-pro.com',
         phone: '+1-555-0002',
-        avatar: { url: 'https://images.pexels.com/photos/3768911/pexels-photo-3768911.jpeg?auto=compress&cs=tinysrgb&w=100' }
+        avatar: {
+          url: 'https://images.pexels.com/photos/3768911/pexels-photo-3768911.jpeg?auto=compress&cs=tinysrgb&w=100',
+        },
       },
       employeeId: 'EMP24001',
       department: 'Mathematics',
@@ -58,7 +61,7 @@ const Teachers: React.FC = () => {
       experience: { totalYears: 8 },
       performance: { rating: 4.8 },
       joiningDate: '2020-08-01',
-      isActive: true
+      isActive: true,
     },
     {
       _id: '2',
@@ -66,7 +69,9 @@ const Teachers: React.FC = () => {
         name: 'Prof. Michael Chen',
         email: 'michael.chen@edutech-pro.com',
         phone: '+1-555-0003',
-        avatar: { url: 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=100' }
+        avatar: {
+          url: 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=100',
+        },
       },
       employeeId: 'EMP24002',
       department: 'Science',
@@ -76,7 +81,7 @@ const Teachers: React.FC = () => {
       experience: { totalYears: 12 },
       performance: { rating: 4.9 },
       joiningDate: '2018-08-01',
-      isActive: true
+      isActive: true,
     },
     {
       _id: '3',
@@ -84,32 +89,46 @@ const Teachers: React.FC = () => {
         name: 'Emma Thompson',
         email: 'emma.thompson@edutech-pro.com',
         phone: '+1-555-0004',
-        avatar: { url: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=100' }
+        avatar: {
+          url: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=100',
+        },
       },
       employeeId: 'EMP24003',
       department: 'English',
       position: 'Teacher',
-      subjects: [{ name: 'English Literature' }, { name: 'Creative Writing' }],
+      subjects: [
+        { name: 'English Literature' },
+        { name: 'Creative Writing' },
+      ],
       classes: [{ name: 'Grade 9A' }, { name: 'Grade 10A' }],
       experience: { totalYears: 6 },
       performance: { rating: 4.7 },
       joiningDate: '2021-08-01',
-      isActive: true
-    }
+      isActive: true,
+    },
   ]
 
   const displayTeachers = teachers.length > 0 ? teachers : mockTeachers
 
   const handleAddTeacher = () => {
-    setShowAddModal(true)
+    if (hasPermission('create', 'teachers')) {
+      setShowAddModal(true)
+    }
   }
 
   const handleEditTeacher = (teacherId: string) => {
-    console.log('Edit teacher:', teacherId)
+    if (hasPermission('update', 'teachers')) {
+      console.log('Edit teacher:', teacherId)
+    }
   }
 
   const handleDeleteTeacher = (teacherId: string) => {
-    console.log('Delete teacher:', teacherId)
+    if (hasPermission('delete', 'teachers')) {
+      if (window.confirm('Are you sure you want to delete this teacher?')) {
+        console.log('Delete teacher:', teacherId)
+        refetch()
+      }
+    }
   }
 
   const handleViewTeacher = (teacherId: string) => {
@@ -126,18 +145,22 @@ const Teachers: React.FC = () => {
       >
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Teachers Management</h1>
-          <p className="text-gray-400">Manage faculty members, assignments, and performance</p>
+          <p className="text-gray-400">
+            Manage faculty members, assignments, and performance
+          </p>
         </div>
-        
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleAddTeacher}
-          className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 neon-glow-gold mt-4 md:mt-0"
-        >
-          <Plus className="h-5 w-5" />
-          <span>Add Teacher</span>
-        </motion.button>
+
+        {hasPermission('create', 'teachers') && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleAddTeacher}
+            className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 neon-glow-gold mt-4 md:mt-0"
+          >
+            <Plus className="h-5 w-5" />
+            <span>Add Teacher</span>
+          </motion.button>
+        )}
       </motion.div>
 
       {/* Filters and Search */}
@@ -164,6 +187,8 @@ const Teachers: React.FC = () => {
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <select
+              title="Filter by department"
+              aria-label="Filter by department"
               value={selectedDepartment}
               onChange={(e) => setSelectedDepartment(e.target.value)}
               className="glass pl-12 pr-8 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 border border-gray-600/30 appearance-none"
@@ -208,17 +233,24 @@ const Teachers: React.FC = () => {
             <div className="flex items-center space-x-4 mb-4">
               <div className="relative">
                 <img
-                  src={teacher.user.avatar?.url || 'https://images.pexels.com/photos/3768911/pexels-photo-3768911.jpeg?auto=compress&cs=tinysrgb&w=100'}
+                  src={
+                    teacher.user.avatar?.url ||
+                    'https://images.pexels.com/photos/3768911/pexels-photo-3768911.jpeg?auto=compress&cs=tinysrgb&w=100'
+                  }
                   alt={teacher.user.name}
                   className="w-16 h-16 rounded-full object-cover border-2 border-primary-500/30"
                 />
-                <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-dark-950 ${
-                  teacher.isActive ? 'bg-green-500' : 'bg-red-500'
-                }`}></div>
+                <div
+                  className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-dark-950 ${
+                    teacher.isActive ? 'bg-green-500' : 'bg-red-500'
+                  }`}
+                ></div>
               </div>
-              
+
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-white truncate">{teacher.user.name}</h3>
+                <h3 className="text-lg font-semibold text-white truncate">
+                  {teacher.user.name}
+                </h3>
                 <p className="text-sm text-gray-400">{teacher.employeeId}</p>
                 <p className="text-sm text-primary-500">{teacher.position}</p>
               </div>
@@ -228,17 +260,23 @@ const Teachers: React.FC = () => {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-gray-400">Department</span>
-                <span className="text-sm text-white font-medium">{teacher.department}</span>
+                <span className="text-sm text-white font-medium">
+                  {teacher.department}
+                </span>
               </div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-gray-400">Experience</span>
-                <span className="text-sm text-white font-medium">{teacher.experience.totalYears} years</span>
+                <span className="text-sm text-white font-medium">
+                  {teacher.experience.totalYears} years
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-400">Rating</span>
                 <div className="flex items-center space-x-1">
                   <Award className="h-4 w-4 text-yellow-500" />
-                  <span className="text-sm text-white font-medium">{teacher.performance.rating}/5</span>
+                  <span className="text-sm text-white font-medium">
+                    {teacher.performance.rating}/5
+                  </span>
                 </div>
               </div>
             </div>
@@ -247,11 +285,15 @@ const Teachers: React.FC = () => {
             <div className="mb-4">
               <div className="flex items-center space-x-2 mb-2">
                 <BookOpen className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-400">Subjects: {teacher.subjects.length}</span>
+                <span className="text-sm text-gray-400">
+                  Subjects: {teacher.subjects.length}
+                </span>
               </div>
               <div className="flex items-center space-x-2">
                 <Users className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-400">Classes: {teacher.classes.length}</span>
+                <span className="text-sm text-gray-400">
+                  Classes: {teacher.classes.length}
+                </span>
               </div>
             </div>
 
@@ -278,25 +320,29 @@ const Teachers: React.FC = () => {
                 <Eye className="h-4 w-4" />
                 <span>View</span>
               </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleEditTeacher(teacher._id)}
-                className="flex-1 bg-primary-500/20 text-primary-400 py-2 rounded-lg font-medium flex items-center justify-center space-x-1 hover:bg-primary-500/30 transition-colors"
-              >
-                <Edit className="h-4 w-4" />
-                <span>Edit</span>
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleDeleteTeacher(teacher._id)}
-                className="bg-red-500/20 text-red-400 p-2 rounded-lg hover:bg-red-500/30 transition-colors"
-              >
-                <Trash2 className="h-4 w-4" />
-              </motion.button>
+
+              {hasPermission('update', 'teachers') && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleEditTeacher(teacher._id)}
+                  className="flex-1 bg-primary-500/20 text-primary-400 py-2 rounded-lg font-medium flex items-center justify-center space-x-1 hover:bg-primary-500/30 transition-colors"
+                >
+                  <Edit className="h-4 w-4" />
+                  <span>Edit</span>
+                </motion.button>
+              )}
+
+              {hasPermission('delete', 'teachers') && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleDeleteTeacher(teacher._id)}
+                  className="bg-red-500/20 text-red-400 p-2 rounded-lg hover:bg-red-500/30 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </motion.button>
+              )}
             </div>
           </motion.div>
         ))}
@@ -305,10 +351,10 @@ const Teachers: React.FC = () => {
       {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <motion.div 
+          <motion.div
             className="loading-spinner"
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
         </div>
       )}
@@ -321,8 +367,12 @@ const Teachers: React.FC = () => {
           className="text-center py-12"
         >
           <GraduationCap className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-400 mb-2">No teachers found</h3>
-          <p className="text-gray-500 mb-6">Get started by adding your first teacher</p>
+          <h3 className="text-xl font-semibold text-gray-400 mb-2">
+            No teachers found
+          </h3>
+          <p className="text-gray-500 mb-6">
+            Get started by adding your first teacher
+          </p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

@@ -1,25 +1,22 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery } from 'react-query'
-import { 
-  FileText, 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  Edit, 
-  Trash2, 
+import {
+  FileText,
+  Plus,
+  Search,
+  Filter,
+  Download,
+  Edit,
+  Trash2,
   Eye,
   Calendar,
   Clock,
-  Users,
-  CheckCircle,
-  XCircle,
   AlertCircle,
-  Upload,
   BookOpen
 } from 'lucide-react'
 import { assignmentsAPI } from '../../services/api'
+import './Assignments.css' // <-- import your new CSS file
 
 const Assignments: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -28,28 +25,27 @@ const Assignments: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [showAddModal, setShowAddModal] = useState(false)
 
-  // Fetch assignments data
-  const { data: assignmentsData, isLoading, refetch } = useQuery(
+  const { data: assignmentsData, isLoading } = useQuery(
     ['assignments', currentPage, searchTerm, selectedSubject, selectedStatus],
-    () => assignmentsAPI.getAll({
-      page: currentPage,
-      search: searchTerm,
-      subject: selectedSubject,
-      status: selectedStatus
-    }),
-    {
-      keepPreviousData: true
-    }
+    () =>
+      assignmentsAPI.getAll({
+        page: currentPage,
+        search: searchTerm,
+        subject: selectedSubject,
+        status: selectedStatus
+      }),
+    { keepPreviousData: true }
   )
 
   const assignments = assignmentsData?.data?.assignments || []
 
-  // Mock data for demonstration
+  // mock fallback
   const mockAssignments = [
     {
       _id: '1',
       title: 'Quadratic Equations Problem Set',
-      description: 'Solve the given quadratic equations using different methods including factoring, completing the square, and quadratic formula.',
+      description:
+        'Solve the given quadratic equations using different methods including factoring, completing the square, and quadratic formula.',
       subject: { name: 'Mathematics', code: 'MATH101' },
       class: { name: 'Grade 10A' },
       teacher: { user: { name: 'Dr. Sarah Johnson' } },
@@ -69,7 +65,8 @@ const Assignments: React.FC = () => {
     {
       _id: '2',
       title: 'Physics Lab Report - Pendulum Experiment',
-      description: 'Write a comprehensive lab report on the simple pendulum experiment conducted in class.',
+      description:
+        'Write a comprehensive lab report on the simple pendulum experiment conducted in class.',
       subject: { name: 'Physics', code: 'PHY101' },
       class: { name: 'Grade 10A' },
       teacher: { user: { name: 'Prof. Michael Chen' } },
@@ -88,7 +85,8 @@ const Assignments: React.FC = () => {
     {
       _id: '3',
       title: 'English Essay - Climate Change',
-      description: 'Write a 500-word essay on the impact of climate change on global ecosystems.',
+      description:
+        'Write a 500-word essay on the impact of climate change on global ecosystems.',
       subject: { name: 'English', code: 'ENG101' },
       class: { name: 'Grade 10B' },
       teacher: { user: { name: 'Emma Thompson' } },
@@ -108,21 +106,10 @@ const Assignments: React.FC = () => {
 
   const displayAssignments = assignments.length > 0 ? assignments : mockAssignments
 
-  const handleAddAssignment = () => {
-    setShowAddModal(true)
-  }
-
-  const handleEditAssignment = (assignmentId: string) => {
-    console.log('Edit assignment:', assignmentId)
-  }
-
-  const handleDeleteAssignment = (assignmentId: string) => {
-    console.log('Delete assignment:', assignmentId)
-  }
-
-  const handleViewAssignment = (assignmentId: string) => {
-    console.log('View assignment:', assignmentId)
-  }
+  const handleAddAssignment = () => setShowAddModal(true)
+  const handleEditAssignment = (id: string) => console.log('Edit assignment:', id)
+  const handleDeleteAssignment = (id: string) => console.log('Delete assignment:', id)
+  const handleViewAssignment = (id: string) => console.log('View assignment:', id)
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -144,69 +131,52 @@ const Assignments: React.FC = () => {
     }
   }
 
-  const isOverdue = (dueDate: string) => {
-    return new Date(dueDate) < new Date()
-  }
+  const isOverdue = (dueDate: string) => new Date(dueDate) < new Date()
 
   const getDaysUntilDue = (dueDate: string) => {
     const due = new Date(dueDate)
     const now = new Date()
-    const diffTime = due.getTime() - now.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays
+    return Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center md:justify-between"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Assignments Management</h1>
           <p className="text-gray-400">Create, manage, and grade student assignments</p>
         </div>
-        
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
           onClick={handleAddAssignment}
-          className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 neon-glow-gold mt-4 md:mt-0"
-        >
-          <Plus className="h-5 w-5" />
-          <span>Create Assignment</span>
+          className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 neon-glow-gold mt-4 md:mt-0">
+          <Plus className="h-5 w-5" /><span>Create Assignment</span>
         </motion.button>
       </motion.div>
 
-      {/* Filters and Search */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="glass-strong rounded-2xl p-6"
-      >
+      {/* Filters */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+        className="glass-strong rounded-2xl p-6">
         <div className="flex flex-col md:flex-row gap-4">
-          {/* Search */}
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               type="text"
-              placeholder="Search assignments by title, subject, or teacher..."
+              placeholder="Search assignments..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="glass w-full pl-12 pr-4 py-3 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 border border-gray-600/30"
+              className="glass w-full pl-12 pr-4 py-3 rounded-xl text-white placeholder-gray-400 focus:outline-none border border-gray-600/30"
             />
           </div>
-
-          {/* Subject Filter */}
           <div className="relative">
             <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="glass pl-12 pr-8 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 border border-gray-600/30 appearance-none"
+              aria-label="Select subject"
+              title="Select subject"
+              className="glass pl-12 pr-8 py-3 rounded-xl text-white border border-gray-600/30 appearance-none"
             >
               <option value="">All Subjects</option>
               <option value="mathematics">Mathematics</option>
@@ -215,14 +185,14 @@ const Assignments: React.FC = () => {
               <option value="english">English</option>
             </select>
           </div>
-
-          {/* Status Filter */}
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="glass pl-12 pr-8 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 border border-gray-600/30 appearance-none"
+              aria-label="Select status"
+              title="Select status"
+              className="glass pl-12 pr-8 py-3 rounded-xl text-white border border-gray-600/30 appearance-none"
             >
               <option value="">All Status</option>
               <option value="active">Active</option>
@@ -231,40 +201,24 @@ const Assignments: React.FC = () => {
               <option value="draft">Draft</option>
             </select>
           </div>
-
-          {/* Export Button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="glass text-white px-6 py-3 rounded-xl font-medium flex items-center space-x-2 border border-gray-600/30 hover:border-primary-500/50 transition-colors"
-          >
-            <Download className="h-5 w-5" />
-            <span>Export</span>
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+            className="glass text-white px-6 py-3 rounded-xl font-medium flex items-center space-x-2 border border-gray-600/30 hover:border-primary-500/50 transition-colors">
+            <Download className="h-5 w-5" /><span>Export</span>
           </motion.button>
         </div>
       </motion.div>
 
       {/* Assignments Grid */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-      >
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {displayAssignments.map((assignment, index) => {
-          const daysUntilDue = getDaysUntilDue(assignment.dueDate)
           const submissionRate = Math.round((assignment.submittedCount / assignment.totalStudents) * 100)
-          
+          const daysUntilDue = getDaysUntilDue(assignment.dueDate)
           return (
-            <motion.div
-              key={assignment._id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+            <motion.div key={assignment._id}
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.02, y: -5 }}
-              className="glass-strong rounded-2xl p-6 hover:neon-glow transition-all duration-300"
-            >
-              {/* Assignment Header */}
+              className="glass-strong rounded-2xl p-6 hover:neon-glow transition-all duration-300">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
@@ -276,16 +230,13 @@ const Assignments: React.FC = () => {
                   <p className="text-sm text-gray-400 mb-2">{assignment.subject.name} • {assignment.class.name}</p>
                   <p className="text-sm text-gray-300">{assignment.teacher.user.name}</p>
                 </div>
-                
                 <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(assignment.status)}`}>
                   {assignment.status}
                 </div>
               </div>
 
-              {/* Description */}
               <p className="text-gray-300 text-sm mb-4 line-clamp-2">{assignment.description}</p>
 
-              {/* Due Date & Marks */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
@@ -295,24 +246,16 @@ const Assignments: React.FC = () => {
                     </span>
                   </div>
                   {isOverdue(assignment.dueDate) ? (
-                    <div className="flex items-center space-x-1 text-red-500">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-xs">Overdue</span>
-                    </div>
+                    <div className="flex items-center space-x-1 text-red-500"><AlertCircle className="h-4 w-4" /><span className="text-xs">Overdue</span></div>
                   ) : daysUntilDue <= 3 ? (
-                    <div className="flex items-center space-x-1 text-yellow-500">
-                      <Clock className="h-4 w-4" />
-                      <span className="text-xs">{daysUntilDue} days left</span>
-                    </div>
+                    <div className="flex items-center space-x-1 text-yellow-500"><Clock className="h-4 w-4" /><span className="text-xs">{daysUntilDue} days left</span></div>
                   ) : null}
                 </div>
-                
                 <div className="text-right">
                   <div className="text-sm text-white font-medium">Max: {assignment.maxMarks} pts</div>
                 </div>
               </div>
 
-              {/* Progress Stats */}
               <div className="grid grid-cols-3 gap-3 mb-4">
                 <div className="text-center glass rounded-lg p-2">
                   <div className="text-lg font-bold text-white">{assignment.submittedCount}</div>
@@ -328,48 +271,33 @@ const Assignments: React.FC = () => {
                 </div>
               </div>
 
-              {/* Progress Bar */}
+              {/* Progress */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-gray-400">Submission Progress</span>
-                  <span className="text-xs text-gray-400">{assignment.submittedCount}/{assignment.totalStudents}</span>
+                  <span className="text-xs text-gray-400">
+                    {assignment.submittedCount}/{assignment.totalStudents}
+                  </span>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${submissionRate}%` }}
-                  ></div>
+                <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                  <div className={`progress-bar`} data-width={submissionRate}></div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex space-x-2">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => handleViewAssignment(assignment._id)}
-                  className="flex-1 glass text-white py-2 rounded-lg font-medium flex items-center justify-center space-x-1 hover:bg-white/10 transition-colors"
-                >
-                  <Eye className="h-4 w-4" />
-                  <span>View</span>
+                  className="flex-1 glass text-white py-2 rounded-lg font-medium flex items-center justify-center space-x-1 hover:bg-white/10 transition-colors">
+                  <Eye className="h-4 w-4" /><span>View</span>
                 </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => handleEditAssignment(assignment._id)}
-                  className="flex-1 bg-primary-500/20 text-primary-400 py-2 rounded-lg font-medium flex items-center justify-center space-x-1 hover:bg-primary-500/30 transition-colors"
-                >
-                  <Edit className="h-4 w-4" />
-                  <span>Edit</span>
+                  className="flex-1 bg-primary-500/20 text-primary-400 py-2 rounded-lg font-medium flex items-center justify-center space-x-1 hover:bg-primary-500/30 transition-colors">
+                  <Edit className="h-4 w-4" /><span>Edit</span>
                 </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => handleDeleteAssignment(assignment._id)}
-                  className="bg-red-500/20 text-red-400 p-2 rounded-lg hover:bg-red-500/30 transition-colors"
-                >
+                  className="bg-red-500/20 text-red-400 p-2 rounded-lg hover:bg-red-500/30 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </motion.button>
               </div>
@@ -378,35 +306,21 @@ const Assignments: React.FC = () => {
         })}
       </motion.div>
 
-      {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <motion.div 
-            className="loading-spinner"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
+          <motion.div className="loading-spinner" animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} />
         </div>
       )}
 
-      {/* Empty State */}
       {!isLoading && displayAssignments.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-12"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
           <FileText className="h-16 w-16 text-gray-600 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-400 mb-2">No assignments found</h3>
           <p className="text-gray-500 mb-6">Get started by creating your first assignment</p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
             onClick={handleAddAssignment}
-            className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 mx-auto neon-glow-gold"
-          >
-            <Plus className="h-5 w-5" />
-            <span>Create First Assignment</span>
+            className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 mx-auto">
+            <Plus className="h-5 w-5" /><span>Create Assignment</span>
           </motion.button>
         </motion.div>
       )}

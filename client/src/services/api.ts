@@ -1,4 +1,5 @@
 import axios from 'axios'
+import toast from 'react-hot-toast'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -9,7 +10,7 @@ const api = axios.create({
   },
 })
 
-// Request interceptor to add auth token
+// ✅ Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -21,28 +22,38 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Response interceptor to handle errors
+// ✅ Response interceptor to handle errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const message = error.response?.data?.message || 'An error occurred'
+
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
+      toast.error('Session expired. Please login again.')
       window.location.href = '/login'
+    } else if (error.response?.status === 403) {
+      toast.error('Access denied. Insufficient permissions.')
+    } else if (error.response?.status >= 500) {
+      toast.error('Server error. Please try again later.')
+    } else {
+      toast.error(message)
     }
+
     return Promise.reject(error)
   }
 )
 
-// Auth API
+// ✅ Auth API
 export const authAPI = {
   login: (credentials: { email: string; password: string }) =>
     api.post('/auth/login', credentials),
   register: (userData: any) => api.post('/auth/register', userData),
-  validateToken: (token: string) => 
+  validateToken: (token: string) =>
     api.get('/auth/validate', { headers: { Authorization: `Bearer ${token}` } }),
 }
 
-// Users API
+// ✅ Users API
 export const usersAPI = {
   getAll: () => api.get('/users'),
   getById: (id: string) => api.get(`/users/${id}`),
@@ -51,65 +62,69 @@ export const usersAPI = {
   delete: (id: string) => api.delete(`/users/${id}`),
 }
 
-// Students API
+// ✅ Students API
 export const studentsAPI = {
-  getAll: () => api.get('/students'),
+  getAll: (params?: any) => api.get('/students', { params }),
   getById: (id: string) => api.get(`/students/${id}`),
   create: (studentData: any) => api.post('/students', studentData),
   update: (id: string, studentData: any) => api.put(`/students/${id}`, studentData),
   delete: (id: string) => api.delete(`/students/${id}`),
+  getStats: () => api.get('/students/stats/overview'),
 }
 
-// Teachers API
+// ✅ Teachers API
 export const teachersAPI = {
-  getAll: () => api.get('/teachers'),
+  getAll: (params?: any) => api.get('/teachers', { params }),
   getById: (id: string) => api.get(`/teachers/${id}`),
   create: (teacherData: any) => api.post('/teachers', teacherData),
   update: (id: string, teacherData: any) => api.put(`/teachers/${id}`, teacherData),
   delete: (id: string) => api.delete(`/teachers/${id}`),
+  getStats: () => api.get('/teachers/stats/overview'),
 }
 
-// Classes API
+// ✅ Classes API
 export const classesAPI = {
-  getAll: () => api.get('/classes'),
+  getAll: (params?: any) => api.get('/classes', { params }),
   getById: (id: string) => api.get(`/classes/${id}`),
   create: (classData: any) => api.post('/classes', classData),
   update: (id: string, classData: any) => api.put(`/classes/${id}`, classData),
   delete: (id: string) => api.delete(`/classes/${id}`),
+  getStats: () => api.get('/classes/stats/overview'),
 }
 
-// Subjects API
+// ✅ Subjects API
 export const subjectsAPI = {
-  getAll: () => api.get('/subjects'),
+  getAll: (params?: any) => api.get('/subjects', { params }),
   getById: (id: string) => api.get(`/subjects/${id}`),
   create: (subjectData: any) => api.post('/subjects', subjectData),
   update: (id: string, subjectData: any) => api.put(`/subjects/${id}`, subjectData),
   delete: (id: string) => api.delete(`/subjects/${id}`),
 }
 
-// Attendance API
+// ✅ Attendance API (✅ fixed duplicate getAll)
 export const attendanceAPI = {
-  getAll: () => api.get('/attendance'),
+  getAll: (params?: any) => api.get('/attendance', { params }),
   getByClass: (classId: string) => api.get(`/attendance/class/${classId}`),
   getByStudent: (studentId: string) => api.get(`/attendance/student/${studentId}`),
   mark: (attendanceData: any) => api.post('/attendance', attendanceData),
+  markBulk: (attendanceData: any) => api.post('/attendance/bulk', attendanceData),
   update: (id: string, attendanceData: any) => api.put(`/attendance/${id}`, attendanceData),
 }
 
-// Assignments API
+// ✅ Assignments API
 export const assignmentsAPI = {
-  getAll: () => api.get('/assignments'),
+  getAll: (params?: any) => api.get('/assignments', { params }),
   getById: (id: string) => api.get(`/assignments/${id}`),
   create: (assignmentData: any) => api.post('/assignments', assignmentData),
   update: (id: string, assignmentData: any) => api.put(`/assignments/${id}`, assignmentData),
   delete: (id: string) => api.delete(`/assignments/${id}`),
-  submit: (assignmentId: string, submissionData: any) => 
+  submit: (assignmentId: string, submissionData: any) =>
     api.post(`/assignments/${assignmentId}/submit`, submissionData),
 }
 
-// Notes API
+// ✅ Notes API
 export const notesAPI = {
-  getAll: () => api.get('/notes'),
+  getAll: (params?: any) => api.get('/notes', { params }),
   getById: (id: string) => api.get(`/notes/${id}`),
   getBySubject: (subjectId: string) => api.get(`/notes/subject/${subjectId}`),
   create: (noteData: any) => api.post('/notes', noteData),
@@ -117,7 +132,7 @@ export const notesAPI = {
   delete: (id: string) => api.delete(`/notes/${id}`),
 }
 
-// Analytics API
+// ✅ Analytics API
 export const analyticsAPI = {
   getDashboardStats: () => api.get('/analytics/dashboard'),
   getStudentPerformance: () => api.get('/analytics/student-performance'),
@@ -125,18 +140,18 @@ export const analyticsAPI = {
   getGradeDistribution: () => api.get('/analytics/grades'),
 }
 
-// Announcements API
+// ✅ Announcements API
 export const announcementsAPI = {
-  getAll: () => api.get('/announcements'),
+  getAll: (params?: any) => api.get('/announcements', { params }),
   getById: (id: string) => api.get(`/announcements/${id}`),
   create: (announcementData: any) => api.post('/announcements', announcementData),
   update: (id: string, announcementData: any) => api.put(`/announcements/${id}`, announcementData),
   delete: (id: string) => api.delete(`/announcements/${id}`),
 }
 
-// Calendar API
+// ✅ Calendar API
 export const calendarAPI = {
-  getEvents: () => api.get('/calendar/events'),
+  getEvents: (params?: any) => api.get('/calendar/events', { params }),
   createEvent: (eventData: any) => api.post('/calendar/events', eventData),
   updateEvent: (id: string, eventData: any) => api.put(`/calendar/events/${id}`, eventData),
   deleteEvent: (id: string) => api.delete(`/calendar/events/${id}`),

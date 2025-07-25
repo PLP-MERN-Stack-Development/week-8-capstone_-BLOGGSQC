@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { useQuery } from 'react-query'
+import { useNavigate } from 'react-router-dom'
 import { 
   Users, 
   GraduationCap, 
@@ -12,13 +13,16 @@ import {
   Clock,
   ArrowUp,
   ArrowDown,
-  Activity
+  Activity,
+  Plus,
+  Eye
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
-import { analyticsAPI } from '../../services/api'
+import { analyticsAPI, studentsAPI, teachersAPI, classesAPI } from '../../services/api'
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth()
+  const { user, hasPermission } = useAuth()
+  const navigate = useNavigate()
 
   // Fetch dashboard stats
   const { data: statsData, isLoading } = useQuery(
@@ -29,6 +33,24 @@ const Dashboard: React.FC = () => {
     }
   )
 
+  // Fetch recent data for "View All" functionality
+  const { data: recentStudents } = useQuery(
+    'recent-students',
+    () => studentsAPI.getAll({ limit: 5 }),
+    { enabled: hasPermission('read', 'students') }
+  )
+
+  const { data: recentTeachers } = useQuery(
+    'recent-teachers', 
+    () => teachersAPI.getAll({ limit: 5 }),
+    { enabled: hasPermission('read', 'teachers') }
+  )
+
+  const { data: recentClasses } = useQuery(
+    'recent-classes',
+    () => classesAPI.getAll({ limit: 5 }),
+    { enabled: hasPermission('read', 'classes') }
+  )
   const stats = statsData?.data?.stats || {}
 
   // Mock data for demonstration
@@ -96,6 +118,43 @@ const Dashboard: React.FC = () => {
     ]
   }
 
+  // Navigation handlers for functional buttons
+  const handleViewAll = (section: string) => {
+    if (hasPermission('read', section)) {
+      navigate(`/${section}`)
+    }
+  }
+
+  const handleAddNew = (section: string) => {
+    if (hasPermission('create', section)) {
+      navigate(`/${section}?action=add`)
+    }
+  }
+
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'add-student':
+        if (hasPermission('create', 'students')) {
+          navigate('/students?action=add')
+        }
+        break
+      case 'create-assignment':
+        if (hasPermission('create', 'assignments')) {
+          navigate('/assignments?action=add')
+        }
+        break
+      case 'take-attendance':
+        if (hasPermission('create', 'attendance')) {
+          navigate('/attendance')
+        }
+        break
+      case 'send-message':
+        if (hasPermission('create', 'announcements')) {
+          navigate('/announcements?action=add')
+        }
+        break
+    }
+  }
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 12) return 'Good morning'
@@ -238,9 +297,15 @@ const Dashboard: React.FC = () => {
               <Activity className="h-6 w-6 text-primary-500" />
               <span>Recent Activities</span>
             </h2>
-            <button className="text-primary-500 hover:text-primary-400 text-sm font-medium transition-colors">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleViewAll('announcements')}
+              className="text-primary-500 hover:text-primary-400 text-sm font-medium transition-colors flex items-center space-x-1"
+            >
+              <Eye className="h-4 w-4" />
               View All
-            </button>
+            </motion.button>
           </div>
           
           <div className="space-y-4">
@@ -278,9 +343,15 @@ const Dashboard: React.FC = () => {
               <Calendar className="h-6 w-6 text-primary-500" />
               <span>Upcoming Events</span>
             </h2>
-            <button className="text-primary-500 hover:text-primary-400 text-sm font-medium transition-colors">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleViewAll('calendar')}
+              className="text-primary-500 hover:text-primary-400 text-sm font-medium transition-colors flex items-center space-x-1"
+            >
+              <Eye className="h-4 w-4" />
               View Calendar
-            </button>
+            </motion.button>
           </div>
           
           <div className="space-y-4">
@@ -309,19 +380,33 @@ const Dashboard: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="glass-strong rounded-2xl p-6"
       >
-        <h2 className="text-xl font-bold text-white mb-6">Quick Actions</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Quick Actions</h2>
+          {hasPermission('create', 'students') && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleAddNew('students')}
+              className="bg-gradient-gold text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 neon-glow-gold"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add New</span>
+            </motion.button>
+          )}
+        </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { name: 'Add Student', icon: Users, color: 'from-blue-500 to-blue-600' },
-            { name: 'Create Assignment', icon: BookOpen, color: 'from-green-500 to-green-600' },
-            { name: 'Take Attendance', icon: Clock, color: 'from-purple-500 to-purple-600' },
-            { name: 'Send Message', icon: Bell, color: 'from-orange-500 to-orange-600' }
-          ].map((action, index) => (
+            { name: 'Add Student', icon: Users, color: 'from-blue-500 to-blue-600', action: 'add-student', permission: 'students' },
+            { name: 'Create Assignment', icon: BookOpen, color: 'from-green-500 to-green-600', action: 'create-assignment', permission: 'assignments' },
+            { name: 'Take Attendance', icon: Clock, color: 'from-purple-500 to-purple-600', action: 'take-attendance', permission: 'attendance' },
+            { name: 'Send Message', icon: Bell, color: 'from-orange-500 to-orange-600', action: 'send-message', permission: 'announcements' }
+          ].filter(action => hasPermission('create', action.permission)).map((action, index) => (
             <motion.button
               key={action.name}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => handleQuickAction(action.action)}
               className={`bg-gradient-to-r ${action.color} rounded-xl p-4 text-white font-medium flex flex-col items-center space-y-2 hover:shadow-lg transition-all`}
             >
               <action.icon className="h-6 w-6" />
@@ -330,6 +415,46 @@ const Dashboard: React.FC = () => {
           ))}
         </div>
       </motion.div>
+
+      {/* Role-specific sections */}
+      {hasPermission('read', 'students') && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-strong rounded-2xl p-6"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white">Recent Students</h2>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleViewAll('students')}
+              className="text-primary-500 hover:text-primary-400 text-sm font-medium transition-colors flex items-center space-x-1"
+            >
+              <Eye className="h-4 w-4" />
+              View All Students
+            </motion.button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {recentStudents?.data?.students?.slice(0, 3).map((student: any) => (
+              <div key={student._id} className="glass rounded-lg p-4">
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={student.user?.avatar?.url || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100'}
+                    alt={student.user?.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div>
+                    <h3 className="text-white font-medium">{student.user?.name}</h3>
+                    <p className="text-gray-400 text-sm">{student.class?.name}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
     </div>
   )
 }

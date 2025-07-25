@@ -1,37 +1,37 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery } from 'react-query'
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  Edit, 
-  Trash2, 
+import {
+  Users,
+  Plus,
+  Search,
+  Filter,
+  Download,
+  Edit,
+  Trash2,
   Eye,
   Mail,
   Phone,
-  Calendar,
-  GraduationCap,
-  MapPin
+  Calendar
 } from 'lucide-react'
 import { studentsAPI } from '../../services/api'
+import { useAuth } from '../../hooks/useAuth'
 
 const Students: React.FC = () => {
+  const { hasPermission } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClass, setSelectedClass] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [showAddModal, setShowAddModal] = useState(false)
 
-  // Fetch students data
   const { data: studentsData, isLoading, refetch } = useQuery(
     ['students', currentPage, searchTerm, selectedClass],
-    () => studentsAPI.getAll({
-      page: currentPage,
-      search: searchTerm,
-      class: selectedClass
-    }),
+    () =>
+      studentsAPI.getAll({
+        page: currentPage,
+        search: searchTerm,
+        class: selectedClass
+      }),
     {
       keepPreviousData: true
     }
@@ -39,7 +39,7 @@ const Students: React.FC = () => {
 
   const students = studentsData?.data?.students || []
 
-  // Mock data for demonstration
+  // Mock data if no API data
   const mockStudents = [
     {
       _id: '1',
@@ -94,27 +94,31 @@ const Students: React.FC = () => {
   const displayStudents = students.length > 0 ? students : mockStudents
 
   const handleAddStudent = () => {
-    setShowAddModal(true)
+    if (hasPermission('create', 'students')) setShowAddModal(true)
   }
 
   const handleEditStudent = (studentId: string) => {
-    console.log('Edit student:', studentId)
-    // Navigate to edit form or open modal
+    if (hasPermission('update', 'students')) {
+      console.log('Edit student:', studentId)
+    }
   }
 
   const handleDeleteStudent = (studentId: string) => {
-    console.log('Delete student:', studentId)
-    // Show confirmation dialog and delete
+    if (hasPermission('delete', 'students')) {
+      if (window.confirm('Are you sure you want to delete this student?')) {
+        console.log('Delete student:', studentId)
+        refetch()
+      }
+    }
   }
 
   const handleViewStudent = (studentId: string) => {
     console.log('View student:', studentId)
-    // Navigate to student detail page
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* HEADER */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -124,19 +128,20 @@ const Students: React.FC = () => {
           <h1 className="text-3xl font-bold text-white mb-2">Students Management</h1>
           <p className="text-gray-400">Manage student records, attendance, and academic performance</p>
         </div>
-        
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleAddStudent}
-          className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 neon-glow-gold mt-4 md:mt-0"
-        >
-          <Plus className="h-5 w-5" />
-          <span>Add Student</span>
-        </motion.button>
+        {hasPermission('create', 'students') && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleAddStudent}
+            className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 neon-glow-gold mt-4 md:mt-0"
+          >
+            <Plus className="h-5 w-5" />
+            <span>Add Student</span>
+          </motion.button>
+        )}
       </motion.div>
 
-      {/* Filters and Search */}
+      {/* FILTERS */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -160,6 +165,8 @@ const Students: React.FC = () => {
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <select
+              title="Select class"              // ✅ added title for accessibility
+              aria-label="Select class filter" // ✅ added aria-label
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
               className="glass pl-12 pr-8 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 border border-gray-600/30 appearance-none"
@@ -172,7 +179,7 @@ const Students: React.FC = () => {
             </select>
           </div>
 
-          {/* Export Button */}
+          {/* Export */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -184,7 +191,7 @@ const Students: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Students Grid */}
+      {/* STUDENT CARDS */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -200,19 +207,20 @@ const Students: React.FC = () => {
             whileHover={{ scale: 1.02, y: -5 }}
             className="glass-strong rounded-2xl p-6 hover:neon-glow transition-all duration-300"
           >
-            {/* Student Header */}
+            {/* HEADER */}
             <div className="flex items-center space-x-4 mb-4">
               <div className="relative">
                 <img
-                  src={student.user.avatar?.url || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100'}
+                  src={student.user.avatar?.url}
                   alt={student.user.name}
                   className="w-16 h-16 rounded-full object-cover border-2 border-primary-500/30"
                 />
-                <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-dark-950 ${
-                  student.isActive ? 'bg-green-500' : 'bg-red-500'
-                }`}></div>
+                <div
+                  className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-dark-950 ${
+                    student.isActive ? 'bg-green-500' : 'bg-red-500'
+                  }`}
+                ></div>
               </div>
-              
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-white truncate">{student.user.name}</h3>
                 <p className="text-sm text-gray-400">{student.studentId}</p>
@@ -220,7 +228,7 @@ const Students: React.FC = () => {
               </div>
             </div>
 
-            {/* Student Stats */}
+            {/* Stats */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">{student.academicRecord.gpa}</div>
@@ -232,7 +240,7 @@ const Students: React.FC = () => {
               </div>
             </div>
 
-            {/* Contact Info */}
+            {/* Contact */}
             <div className="space-y-2 mb-4">
               <div className="flex items-center space-x-2 text-sm text-gray-300">
                 <Mail className="h-4 w-4 text-gray-400" />
@@ -248,7 +256,7 @@ const Students: React.FC = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* ACTIONS */}
             <div className="flex space-x-2">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -259,60 +267,58 @@ const Students: React.FC = () => {
                 <Eye className="h-4 w-4" />
                 <span>View</span>
               </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleEditStudent(student._id)}
-                className="flex-1 bg-primary-500/20 text-primary-400 py-2 rounded-lg font-medium flex items-center justify-center space-x-1 hover:bg-primary-500/30 transition-colors"
-              >
-                <Edit className="h-4 w-4" />
-                <span>Edit</span>
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleDeleteStudent(student._id)}
-                className="bg-red-500/20 text-red-400 p-2 rounded-lg hover:bg-red-500/30 transition-colors"
-              >
-                <Trash2 className="h-4 w-4" />
-              </motion.button>
+              {hasPermission('update', 'students') && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleEditStudent(student._id)}
+                  className="flex-1 bg-primary-500/20 text-primary-400 py-2 rounded-lg font-medium flex items-center justify-center space-x-1 hover:bg-primary-500/30 transition-colors"
+                >
+                  <Edit className="h-4 w-4" />
+                  <span>Edit</span>
+                </motion.button>
+              )}
+              {hasPermission('delete', 'students') && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleDeleteStudent(student._id)}
+                  className="bg-red-500/20 text-red-400 p-2 rounded-lg hover:bg-red-500/30 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </motion.button>
+              )}
             </div>
           </motion.div>
         ))}
       </motion.div>
 
-      {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <motion.div 
+          <motion.div
             className="loading-spinner"
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
         </div>
       )}
 
-      {/* Empty State */}
       {!isLoading && displayStudents.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-12"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
           <Users className="h-16 w-16 text-gray-600 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-400 mb-2">No students found</h3>
           <p className="text-gray-500 mb-6">Get started by adding your first student</p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleAddStudent}
-            className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 mx-auto neon-glow-gold"
-          >
-            <Plus className="h-5 w-5" />
-            <span>Add First Student</span>
-          </motion.button>
+          {hasPermission('create', 'students') && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleAddStudent}
+              className="bg-gradient-gold text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 mx-auto neon-glow-gold"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Add First Student</span>
+            </motion.button>
+          )}
         </motion.div>
       )}
     </div>

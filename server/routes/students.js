@@ -4,6 +4,7 @@ const Student = require('../models/Student');
 const User = require('../models/User');
 const Class = require('../models/Class');
 const { auth, authorize } = require('../middleware/auth');
+const { checkPermission } = require('../middleware/rbac');
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.use(auth);
 // @route   GET /api/students
 // @desc    Get all students with filtering and pagination
 // @access  Private (Admin, Teacher)
-router.get('/', authorize('admin', 'teacher'), [
+router.get('/', checkPermission('students', 'read'), [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   query('class').optional().isMongoId().withMessage('Class must be a valid ID'),
@@ -195,7 +196,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/students
 // @desc    Create new student
 // @access  Private (Admin only)
-router.post('/', authorize('admin'), [
+router.post('/', checkPermission('students', 'create'), [
   body('user.name').trim().notEmpty().withMessage('Student name is required'),
   body('user.email').isEmail().withMessage('Valid email is required'),
   body('user.password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
@@ -306,7 +307,7 @@ router.post('/', authorize('admin'), [
 // @route   PUT /api/students/:id
 // @desc    Update student
 // @access  Private (Admin, Teacher - limited fields)
-router.put('/:id', authorize('admin', 'teacher'), async (req, res) => {
+router.put('/:id', checkPermission('students', 'update'), async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -387,7 +388,7 @@ router.put('/:id', authorize('admin', 'teacher'), async (req, res) => {
 // @route   DELETE /api/students/:id
 // @desc    Delete/deactivate student
 // @access  Private (Admin only)
-router.delete('/:id', authorize('admin'), async (req, res) => {
+router.delete('/:id', checkPermission('students', 'delete'), async (req, res) => {
   try {
     const { id } = req.params;
     const { permanent = false } = req.query;
