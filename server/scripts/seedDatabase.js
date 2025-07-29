@@ -1,4 +1,3 @@
-// scripts/seedDatabase.js
 require('dotenv').config();
 const mongoose = require('mongoose');
 
@@ -8,8 +7,6 @@ const Teacher = require('../models/Teacher');
 const Student = require('../models/Student');
 const Subject = require('../models/Subject');
 const ClassModel = require('../models/Class');
-// If you have a Parent model, uncomment and use it:
-// const Parent = require('../models/Parent');
 
 async function seed() {
   try {
@@ -35,46 +32,49 @@ async function seed() {
       Student.deleteMany({}),
       Subject.deleteMany({}),
       ClassModel.deleteMany({}),
-      // If you have Parent model: await Parent.deleteMany({})
     ]);
     console.log('🧹 Old data cleared');
 
-    // ✅ Create Users (with plain text passwords; pre-save hook will hash them)
-    const adminUser = await User.create({
+    // ✅ Create Users using .save() (middleware handles hashing)
+    const adminUser = new User({
       name: 'System Admin',
       email: 'admin@edutech-pro.com',
-      password: 'Admin123!', // matches demo credentials
+      password: 'Admin123!',
       role: 'admin',
       phone: '+254700000001',
       isEmailVerified: true
     });
+    await adminUser.save();
 
-    const teacherUser = await User.create({
+    const teacherUser = new User({
       name: 'Sarah Johnson',
       email: 'sarah.johnson@edutech-pro.com',
-      password: 'Teacher123!', // matches demo credentials
+      password: 'Teacher123!',
       role: 'teacher',
       phone: '+254700000002',
       isEmailVerified: true
     });
+    await teacherUser.save();
 
-    const studentUser = await User.create({
+    const studentUser = new User({
       name: 'John Smith',
       email: 'john.smith@student.edutech-pro.com',
-      password: 'Student123!', // matches demo credentials
+      password: 'Student123!',
       role: 'student',
       phone: '+254700000003',
       isEmailVerified: true
     });
+    await studentUser.save();
 
-    const parentUser = await User.create({
+    const parentUser = new User({
       name: 'Robert Smith',
       email: 'robert.smith@parent.edutech-pro.com',
-      password: 'Parent123!', // matches demo credentials
+      password: 'Parent123!',
       role: 'parent',
       phone: '+254700000004',
       isEmailVerified: true
     });
+    await parentUser.save();
 
     // ✅ Create Teacher Profile
     const teacherProfile = await Teacher.create({
@@ -172,13 +172,6 @@ async function seed() {
         paidAmount: 5000,
       }
     });
-
-    // ✅ (Optional) Create Parent Profile if model exists
-    // await Parent.create({
-    //   user: parentUser._id,
-    //   children: [studentUser._id],
-    //   phoneNumber: '+254700000004'
-    // });
 
     console.log('✅ Database seeded successfully!');
     process.exit(0);

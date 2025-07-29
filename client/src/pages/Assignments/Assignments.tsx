@@ -16,7 +16,6 @@ import {
   BookOpen
 } from 'lucide-react'
 import { assignmentsAPI } from '../../services/api'
-import './Assignments.css' // <-- import your new CSS file
 
 const Assignments: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -39,7 +38,7 @@ const Assignments: React.FC = () => {
 
   const assignments = assignmentsData?.data?.assignments || []
 
-  // mock fallback
+  // fallback mock
   const mockAssignments = [
     {
       _id: '1',
@@ -174,8 +173,6 @@ const Assignments: React.FC = () => {
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              aria-label="Select subject"
-              title="Select subject"
               className="glass pl-12 pr-8 py-3 rounded-xl text-white border border-gray-600/30 appearance-none"
             >
               <option value="">All Subjects</option>
@@ -190,8 +187,6 @@ const Assignments: React.FC = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              aria-label="Select status"
-              title="Select status"
               className="glass pl-12 pr-8 py-3 rounded-xl text-white border border-gray-600/30 appearance-none"
             >
               <option value="">All Status</option>
@@ -246,9 +241,13 @@ const Assignments: React.FC = () => {
                     </span>
                   </div>
                   {isOverdue(assignment.dueDate) ? (
-                    <div className="flex items-center space-x-1 text-red-500"><AlertCircle className="h-4 w-4" /><span className="text-xs">Overdue</span></div>
+                    <div className="flex items-center space-x-1 text-red-500">
+                      <AlertCircle className="h-4 w-4" /><span className="text-xs">Overdue</span>
+                    </div>
                   ) : daysUntilDue <= 3 ? (
-                    <div className="flex items-center space-x-1 text-yellow-500"><Clock className="h-4 w-4" /><span className="text-xs">{daysUntilDue} days left</span></div>
+                    <div className="flex items-center space-x-1 text-yellow-500">
+                      <Clock className="h-4 w-4" /><span className="text-xs">{daysUntilDue} days left</span>
+                    </div>
                   ) : null}
                 </div>
                 <div className="text-right">
@@ -271,7 +270,6 @@ const Assignments: React.FC = () => {
                 </div>
               </div>
 
-              {/* Progress */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-gray-400">Submission Progress</span>
@@ -280,7 +278,10 @@ const Assignments: React.FC = () => {
                   </span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                  <div className={`progress-bar`} data-width={submissionRate}></div>
+                  <div
+                    className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${submissionRate}%` }}
+                  ></div>
                 </div>
               </div>
 
