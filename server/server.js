@@ -37,11 +37,16 @@ const app = express();
 const httpServer = createServer(app);
 
 // ======================
-// ✅ Socket.IO with CLIENT_URL
+// ✅ Allowed origins from .env
+// ======================
+const allowedOrigins = (process.env.CLIENT_URL || '').split(',');
+
+// ======================
+// ✅ Socket.IO with CORS
 // ======================
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -74,11 +79,17 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // ======================
-// ✅ CORS with CLIENT_URL
+// ✅ CORS middleware
 // ======================
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // Allow non-browser requests
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -183,7 +194,7 @@ httpServer.listen(PORT, () => {
 📊 Database: ${process.env.MONGODB_DB_NAME}
 ⚡ Socket.IO: Enabled
 🔒 Security: Enhanced
-✅ CORS Origin: ${process.env.CLIENT_URL || 'http://localhost:5173'}
+✅ CORS Allowed Origins: ${allowedOrigins.join(', ')}
   `);
 });
 

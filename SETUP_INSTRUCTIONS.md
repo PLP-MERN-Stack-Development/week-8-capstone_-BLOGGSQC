@@ -110,42 +110,7 @@ cp .env.example .env
 
 Edit the `.env` file with your actual values:
 
-```env
-# Database Configuration
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/edutech-pro?retryWrites=true&w=majority
-DB_NAME=edutech-pro
-
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-this-in-production
-JWT_EXPIRE=24h
-JWT_REFRESH_EXPIRE=7d
-
-# Server Configuration
-PORT=5000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:3000
-
-# Cloudinary Configuration
-CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
-CLOUDINARY_API_KEY=your-cloudinary-api-key
-CLOUDINARY_API_SECRET=your-cloudinary-api-secret
-
-# Email Configuration (optional for development)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
-EMAIL_FROM=EduTech Pro <noreply@edutech-pro.com>
-
-# Security Configuration
-BCRYPT_SALT_ROUNDS=12
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-
-# File Upload Configuration
-MAX_FILE_SIZE=10485760
-ALLOWED_FILE_TYPES=pdf,doc,docx,ppt,pptx,jpg,jpeg,png,gif,mp4,avi,mov
+,gif,mp4,avi,mov
 ```
 
 ### 4. Seed the Database (Optional but Recommended)
@@ -410,30 +375,3 @@ npm run dev
 - [Framer Motion Guide](https://www.framer.com/motion/)
 - [Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)
 
-## 🆘 Getting Help
-
-If you encounter issues:
-
-1. **Check the Console**: Look for error messages in browser/terminal
-2. **Review Logs**: Check server logs for detailed error information
-3. **Database Issues**: Use MongoDB Atlas monitoring tools
-4. **API Testing**: Use Thunder Client or Postman to test endpoints
-5. **Community Support**: Search for solutions on Stack Overflow
-
-## 🎉 Success Indicators
-
-Your setup is successful when:
-
-- [ ] Both frontend and backend servers start without errors
-- [ ] You can login with demo credentials
-- [ ] Navigation between pages works smoothly
-- [ ] API calls return data successfully
-- [ ] Database operations (CRUD) work correctly
-- [ ] File uploads function properly
-- [ ] Responsive design works on different screen sizes
-
----
-
-**Congratulations!** 🎉 You now have a fully functional School Management System running locally. The system is production-ready and can be deployed to handle real educational institution needs.
-
-For any questions or support, refer to the documentation or reach out to the development team.
