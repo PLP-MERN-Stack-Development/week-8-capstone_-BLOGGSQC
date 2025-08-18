@@ -39,7 +39,11 @@ const httpServer = createServer(app);
 // ======================
 // ✅ Allowed origins from .env
 // ======================
-const allowedOrigins = (process.env.CLIENT_URL || '').split(',');
+const allowedOrigins = (process.env.CLIENT_URL || '').split(',').map(o => o.trim()).filter(Boolean);
+
+if (allowedOrigins.length === 0) {
+  console.warn("⚠️ No CLIENT_URL set in .env – all requests will fail CORS.");
+}
 
 // ======================
 // ✅ Socket.IO with CORS
@@ -88,6 +92,7 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
+      console.error(`❌ CORS blocked request from origin: ${origin}`);
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
