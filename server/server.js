@@ -77,10 +77,19 @@ app.use('/api/', limiter);
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // Allow non-browser requests
+      if (!origin) return callback(null, true); // Allow server-to-server or Postman
+
+      // ✅ Always allow explicitly defined origins from .env
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
+
+      // ✅ Allow any *.vercel.app subdomain
+      const vercelRegex = /^https?:\/\/.*\.vercel\.app$/;
+      if (vercelRegex.test(origin)) {
+        return callback(null, true);
+      }
+
       console.error(`❌ CORS blocked request from origin: ${origin}`);
       return callback(new Error('Not allowed by CORS'));
     },
