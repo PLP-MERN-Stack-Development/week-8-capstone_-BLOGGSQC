@@ -3,8 +3,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
 require('dotenv').config();
 
 // ======================
@@ -31,30 +29,21 @@ const errorHandler = require('./middleware/errorHandler');
 const { connectDB } = require('./config/database');
 
 // ======================
-// ✅ App and Server
+// ✅ App initialization
 // ======================
 const app = express();
-const httpServer = createServer(app);
 
 // ======================
 // ✅ Allowed origins from .env
 // ======================
-const allowedOrigins = (process.env.CLIENT_URL || '').split(',').map(o => o.trim()).filter(Boolean);
+const allowedOrigins = (process.env.CLIENT_URL || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
 
 if (allowedOrigins.length === 0) {
   console.warn("⚠️ No CLIENT_URL set in .env – all requests will fail CORS.");
 }
-
-// ======================
-// ✅ Socket.IO with CORS
-// ======================
-const io = new Server(httpServer, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
-});
 
 // ======================
 // ✅ Connect to MongoDB
@@ -142,36 +131,6 @@ app.use('/api/calendar', calendarRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // ======================
-// ✅ Socket.IO Handlers
-// ======================
-io.on('connection', (socket) => {
-  console.log('✅ User connected:', socket.id);
-
-  // Join specific room
-  socket.on('join_room', (data) => {
-    socket.join(data.room);
-    console.log(`ℹ️ User ${socket.id} joined room: ${data.room}`);
-  });
-
-  // Notifications
-  socket.on('send_notification', (data) => {
-    socket.to(data.room).emit('receive_notification', data);
-  });
-
-  // Announcements
-  socket.on('send_announcement', (data) => {
-    io.emit('receive_announcement', data);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('❌ User disconnected:', socket.id);
-  });
-});
-
-// Make io available in routes
-app.set('io', io);
-
-// ======================
 // ✅ 404 handler
 // ======================
 app.use('*', (req, res) => {
@@ -187,35 +146,6 @@ app.use('*', (req, res) => {
 app.use(errorHandler);
 
 // ======================
-// ✅ Start server
+// ✅ Export for Vercel
 // ======================
-const PORT = process.env.PORT || 5000;
-
-httpServer.listen(PORT, () => {
-  console.log(`
-🚀 EduTech Pro Server is running!
-📡 Port: ${PORT}
-🌍 Environment: ${process.env.NODE_ENV}
-📊 Database: ${process.env.MONGODB_DB_NAME}
-⚡ Socket.IO: Enabled
-🔒 Security: Enhanced
-✅ CORS Allowed Origins: ${allowedOrigins.join(', ')}
-  `);
-});
-
-// ======================
-// ✅ Process error handlers
-// ======================
-process.on('unhandledRejection', (err) => {
-  console.error('🔥 Unhandled Promise Rejection:', err);
-  httpServer.close(() => {
-    process.exit(1);
-  });
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('🔥 Uncaught Exception:', err);
-  process.exit(1);
-});
-
 module.exports = app;
